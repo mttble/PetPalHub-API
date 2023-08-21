@@ -76,6 +76,10 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: 'false',
     },
+    isCarer: {
+        type: Boolean,
+        default: 'false',
+    },
 });
 
 const UserModel = mongoose.model('User', userSchema);
