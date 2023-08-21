@@ -1,25 +1,30 @@
 import mongoose from 'mongoose'
-import dotenv from 'dotenv'
-
-
-dotenv.config()
 
 async function dbClose() {
     await mongoose.connection.close()
     console.log('Database disconnected')
   }
 
-mongoose.connect(process.env.ATLAS_DB_URL)
-//   .then(m => console.log(m.connection.readyState === 1 ? 'Mongoose connected!' : 'Mongoose failed to connect'))
-  .catch(err => console.error(err))
+
+const dbConnection = async () => {
+    try {
+        await mongoose.connect(process.env.ATLAS_DB_URL, { useNewUrlParser: true, useUnifiedTopology: true });
+        
+        console.log('Mongoose connected to', process.env.ATLAS_DB_URL);
+
+        mongoose.connection.on('error', (err) => {
+            console.error('Mongoose connection error:', err);
+        });
+
+        mongoose.connection.on('disconnected', () => {
+            console.log('Mongoose disconnected');
+        });
+    } catch (error) {
+        console.error('Error connecting to the database:', error);
+        // Exit the process with failure
+        process.exit(1);
+    }
+}
 
 
-  const userSchema = new mongoose.Schema({
-    firstName: { type: String, required: true},
-    lastName: { type: String, required: true }
-  })
-
-  const UserModel = mongoose.model('User', userSchema)
-
-
-  export {UserModel, dbClose} 
+export { dbClose, dbConnection }
