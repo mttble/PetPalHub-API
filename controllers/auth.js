@@ -10,7 +10,13 @@ export const register = async (req, res, next) => {
         if (existingUser) {
             return res.status(400).json({ message: "Email is already in use." });
         }
-
+        
+        const passwordToBeBalidated = req.body.password
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        if (!passwordRegex.test(passwordToBeBalidated)) {
+            return res.status(400).json({ message: "Password should have at least one uppercase letter, one lowercase letter, one number, and one special character." });
+        }
+    
         //generate salt for password
         const salt = await bcrypt.genSalt(10); 
         //combine the salt and the hashed password
@@ -43,6 +49,7 @@ export const register = async (req, res, next) => {
         res.status(201).json({ message: "User registered successfully!", user: userObject });
 
     } catch (error) {
+        console.error("Error:", error);
         // Catch any errors and send an error response
         res.status(500).json({ message: "Error registering the user", error: error.message });
     }
