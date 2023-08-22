@@ -1,10 +1,18 @@
 import express from 'express'
 import cors from 'cors'
+import cookieParser from 'cookie-parser'
 import authRoutes from './routes/authRoute.js'
+import usersRoutes from './routes/usersRoute.js'
+
+
 import {register} from './controllers/auth.js'
 
 
 const app = express()
+
+
+
+app.use(cookieParser())
 
 
 const corsOptions = {
@@ -23,6 +31,7 @@ app.use('/auth', authRoutes)
 app.get('/test', authRoutes)
 
 app.post('/register', register)
+app.use('/user', usersRoutes)
 
 
 
