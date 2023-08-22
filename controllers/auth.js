@@ -3,7 +3,6 @@ import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 import createError from 'http-errors';
 
-
 export const register = async (req, res, next) => {
     try {
         // Check if the email already exists
@@ -56,10 +55,21 @@ export const login = async (req, res, next) => {
        if(!user) return next(createError(404, "User not found"))
 
        const isPasswordCorrect = await bcrypt.compare(req.body.password, user.password)
-       if(!isPasswordCorrect) return next(createError(400, "Wrong password or username!"))
+       if(!isPasswordCorrect) 
+            return next(createError(400, "Wrong password or username!"))
 
-       res.status(200).json(user)
+
+       const {password, isAdmin, ...otherDetails} = user._doc
+
+       const token = jwt.sign({id:user._id, isAdmin:req.body.isAdmin, isCarer:req.body.isCarer}, process.env.JWT_SECRET, {}, (err, token) => {
+        if(err) throw err;
+        res.cookie("access_token", token,{httpOnly: true,}).status(200).json({...otherDetails})
+        }
+       )
+        
     }catch(err){
         next(err);
     }
 }
+
+
