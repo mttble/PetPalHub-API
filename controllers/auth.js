@@ -5,12 +5,23 @@ import createError from 'http-errors';
 import moment from 'moment';
 import { checkExistingEmail, validateAndHashPassword, validateDateOfBirth } from '../utils/validation.js'
 
+export const test = async (req, res, next) => {
+    res.json('test is working')
+}
 
 export const register = async (req, res, next) => {
     try {
-        await checkExistingEmail(req.body.email, UserModel);
+        const emailExists = await checkExistingEmail(req.body.email, UserModel);
+        if (emailExists) {
+            return res.json({error: "email already exists"});
+        }
+
         const hashedPassword = await validateAndHashPassword(req.body.password);
         validateDateOfBirth(req.body.dateOfBirth)
+        if (hashedPassword === false) {
+            return res.json({error: "Password must contain: at least one lowercase letter, one uppercase letter, one number, one special character and be at least 8 characters in length"})
+        }
+
         const parsedDate = moment.utc(req.body.dateOfBirth, "DD/MM/YYYY").toDate();
 
         const newUser = new UserModel({
@@ -52,22 +63,28 @@ export const register = async (req, res, next) => {
 
 export const login = async (req, res, next) => {
     try {
-       const user = await UserModel.findOne({email:req.body.email})
-       if(!user) return next(createError(404, "User not found"))
+        const user = await UserModel.findOne({email:req.body.email})
+        if(!user)
+            return res.json({
+                error: "User not found"
+        })
 
-       const isPasswordCorrect = await bcrypt.compare(req.body.password, user.password)
-       if(!isPasswordCorrect) 
-            return next(createError(400, "Wrong password or username!"))
+        const isPasswordCorrect = await bcrypt.compare(req.body.password, user.password)
+        if(!isPasswordCorrect)
+            return res.json({
+                error: "Password is incorrect"
+            })
+        if (isPasswordCorrect) {
+            res.json('Passwords match')
+        }
 
 
-       const {password, isAdmin, ...otherDetails} = user._doc
+        const {password, isAdmin, ...otherDetails} = user._doc
 
-       const token = jwt.sign({id:user._id, isAdmin:req.body.isAdmin, isCarer:req.body.isCarer}, process.env.JWT_SECRET, {}, (err, token) => {
+        const token = jwt.sign({id:user._id, isAdmin:req.body.isAdmin, isCarer:req.body.isCarer}, process.env.JWT_SECRET, {}, (err, token) => {
         if(err) throw err;
         res.cookie("access_token", token,{httpOnly: true,}).status(200).json({...otherDetails})
-        }
-       )
-        
+        })
     }catch(err){
         next(err);
     }
