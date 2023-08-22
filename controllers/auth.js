@@ -2,34 +2,24 @@ import {UserModel} from "../models/User.js"
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 import createError from 'http-errors';
+import moment from 'moment';
+import { checkExistingEmail, validateAndHashPassword, validateDateOfBirth } from '../utils/validation.js'
+
 
 export const register = async (req, res, next) => {
     try {
-        // Check if the email already exists
-        const existingUser = await UserModel.findOne({ email: req.body.email });
-        if (existingUser) {
-            return res.status(400).json({ message: "Email is already in use." });
-        }
-        
-        const passwordToBeBalidated = req.body.password
-        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-        if (!passwordRegex.test(passwordToBeBalidated)) {
-            return res.status(400).json({ message: "Password should have at least one uppercase letter, one lowercase letter, one number, and one special character." });
-        }
-    
-        //generate salt for password
-        const salt = await bcrypt.genSalt(10); 
-        //combine the salt and the hashed password
-        const hashedPassword = await bcrypt.hash(req.body.password, salt); 
-
+        await checkExistingEmail(req.body.email, UserModel);
+        const hashedPassword = await validateAndHashPassword(req.body.password);
+        validateDateOfBirth(req.body.dateOfBirth)
+        const parsedDate = moment.utc(req.body.dateOfBirth, "DD/MM/YYYY").toDate();
 
         const newUser = new UserModel({
             firstName: req.body.firstName,
             lastName: req.body.lastName,
             email: req.body.email,
             password: hashedPassword,
-            dateOfBirth: req.body.dateOfBirth,
-            profileImage: req.body.profileImage,
+            dateOfBirth: parsedDate,
+            profilepImage: req.body.profileImage,
             address: {
                 street: req.body.address?.street,
                 city: req.body.address?.city,
@@ -38,12 +28,16 @@ export const register = async (req, res, next) => {
                 country: req.body.address?.country
             },
             phoneNumber: req.body.phoneNumber,
-            bio: req.body.bio
+            bio: req.body.bio,
+            isCarer: req.body.isCarer
         });
 
         // Save the new user to the database
         const savedUser = await newUser.save();
         const userObject = savedUser.toObject(); // Convert the Mongoose document to a plain JavaScript object
+        if (userObject.dateOfBirth) {
+            userObject.dateOfBirth = moment.utc(userObject.dateOfBirth).format('DD/MM/YYYY');
+        }
         delete userObject.password; // Remove the password
         delete userObject.isAdmin;  // Remove the isAdmin field
         res.status(201).json({ message: "User registered successfully!", user: userObject });
