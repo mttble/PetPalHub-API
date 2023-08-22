@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const userSchema = new mongoose.Schema({
+const carerSchema = new mongoose.Schema({
     firstName: {
         type: String,
         required: true,
@@ -74,11 +74,11 @@ const userSchema = new mongoose.Schema({
     },
     isCarer: {
         type: Boolean,
-        default: 'false',
+        default: 'true',
     },
 });
 
-const UserModel = mongoose.model('User', userSchema);
-export {UserModel}
+const CarerModel = mongoose.model('Carer', carerSchema);
+export {CarerModel}
 
 
