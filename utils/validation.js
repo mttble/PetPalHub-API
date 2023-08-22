@@ -12,7 +12,8 @@ export const validateAndHashPassword = async (password) => {
   const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
   if (!passwordRegex.test(password)) {
-    throw new Error("Password should have at least one uppercase letter, one lowercase letter, one number, and one special character.");
+    return false
+    // throw new Error("Password should have at least one uppercase letter, one lowercase letter, one number, and one special character.");
   }
 
   const salt = await bcrypt.genSalt(10);
