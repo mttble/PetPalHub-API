@@ -1,5 +1,11 @@
 import {UserModel} from "../models/User.js"
 import bcrypt from "bcrypt"
+import jwt from "jsonwebtoken"
+import createError from 'http-errors';
+
+export const test = async (req, res, next) => {
+    res.json('test is working')
+}
 
 export const register = async (req, res, next) => {
     try {
@@ -10,9 +16,9 @@ export const register = async (req, res, next) => {
         }
 
         //generate salt for password
-        const salt = await bcrypt.genSalt(10); 
+        const salt = await bcrypt.genSalt(10);
         //combine the salt and the hashed password
-        const hashedPassword = await bcrypt.hash(req.body.password, salt); 
+        const hashedPassword = await bcrypt.hash(req.body.password, salt);
 
 
         const newUser = new UserModel({
@@ -43,5 +49,20 @@ export const register = async (req, res, next) => {
     } catch (error) {
         // Catch any errors and send an error response
         res.status(500).json({ message: "Error registering the user", error: error.message });
+    }
+}
+
+
+export const login = async (req, res, next) => {
+    try {
+        const user = await UserModel.findOne({email:req.body.email})
+        if(!user) return next(createError(404, "User not found"))
+
+        const isPasswordCorrect = await bcrypt.compare(req.body.password, user.password)
+        if(!isPasswordCorrect) return next(createError(400, "Wrong password or username!"))
+
+        res.status(200).json(user)
+    }catch(err){
+        next(err);
     }
 }

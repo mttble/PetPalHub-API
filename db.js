@@ -3,7 +3,7 @@ import mongoose from 'mongoose'
 async function dbClose() {
     await mongoose.connection.close()
     console.log('Database disconnected')
-  }
+}
 
 
 const dbConnection = async () => {
