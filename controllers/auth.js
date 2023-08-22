@@ -11,7 +11,10 @@ export const test = async (req, res, next) => {
 
 export const register = async (req, res, next) => {
     try {
-        await checkExistingEmail(req.body.email, UserModel);
+        const emailExists = await checkExistingEmail(req.body.email, UserModel);
+        if (emailExists) {
+            return res.json({error: "email already exists"});
+        }
         const hashedPassword = await validateAndHashPassword(req.body.password);
         validateDateOfBirth(req.body.dateOfBirth)
         const parsedDate = moment.utc(req.body.dateOfBirth, "DD/MM/YYYY").toDate();
