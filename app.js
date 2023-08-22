@@ -5,7 +5,7 @@ import authRoutes from './routes/authRoute.js'
 import usersRoutes from './routes/usersRoute.js'
 
 
-import {register} from './controllers/auth.js'
+import { register, login } from './controllers/auth.js'
 
 
 const app = express()
@@ -32,6 +32,7 @@ app.get('/test', authRoutes)
 
 app.post('/register', register)
 app.use('/user', usersRoutes)
+app.post('/login', login)
 
 
 
