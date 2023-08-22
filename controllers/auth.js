@@ -15,8 +15,13 @@ export const register = async (req, res, next) => {
         if (emailExists) {
             return res.json({error: "email already exists"});
         }
+
         const hashedPassword = await validateAndHashPassword(req.body.password);
         validateDateOfBirth(req.body.dateOfBirth)
+        if (hashedPassword === false) {
+            return res.json({error: "Password must contain: at least one lowercase letter, one uppercase letter, one number, one special character and be at least 8 characters in length"})
+        }
+
         const parsedDate = moment.utc(req.body.dateOfBirth, "DD/MM/YYYY").toDate();
 
         const newUser = new UserModel({
