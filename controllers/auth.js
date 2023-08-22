@@ -5,6 +5,9 @@ import createError from 'http-errors';
 import moment from 'moment';
 import { checkExistingEmail, validateAndHashPassword, validateDateOfBirth } from '../utils/validation.js'
 
+export const test = async (req, res, next) => {
+    res.json('test is working')
+}
 
 export const register = async (req, res, next) => {
     try {
@@ -52,8 +55,8 @@ export const register = async (req, res, next) => {
 
 export const login = async (req, res, next) => {
     try {
-       const user = await UserModel.findOne({email:req.body.email})
-       if(!user) return next(createError(404, "User not found"))
+        const user = await UserModel.findOne({email:req.body.email})
+        if(!user) return next(createError(404, "User not found"))
 
        const isPasswordCorrect = await bcrypt.compare(req.body.password, user.password)
        if(!isPasswordCorrect) 

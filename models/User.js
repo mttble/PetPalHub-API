@@ -71,7 +71,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         enum: ['Active', 'Inactive', 'Banned'],
         default: 'Active',
-    }, 
+    },
     isAdmin: {
         type: Boolean,
         default: 'false',
