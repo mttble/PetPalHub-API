@@ -2,11 +2,11 @@
 import bcrypt from "bcrypt";
 
 export const checkExistingEmail = async (email, UserModel) => {
-  const existingUser = await UserModel.findOne({ email });
-  if (existingUser) {
-    return !!existingUser
+    const existingUser = await UserModel.findOne({ email });
+    if (existingUser) {
+      return !!existingUser
+    }
   }
-}
 
 export const validateAndHashPassword = async (password) => {
   const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
@@ -23,6 +23,10 @@ export const validateAndHashPassword = async (password) => {
 
 
 export const validateDateOfBirth = (dateString) => {
+    if (!dateString) {
+        // If no DOB provided, simply return without validating
+        return;
+    }
     // Check the format using regex
     const dateRegex = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
 
