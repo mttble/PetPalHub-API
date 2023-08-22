@@ -2,22 +2,24 @@ import {UserModel} from "../models/User.js"
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 import createError from 'http-errors';
-import { checkExistingEmail, validateAndHashPassword } from '../utils/validation.js'
+import moment from 'moment';
+import { checkExistingEmail, validateAndHashPassword, validateDateOfBirth } from '../utils/validation.js'
 
 
 export const register = async (req, res, next) => {
     try {
         await checkExistingEmail(req.body.email, UserModel);
-
         const hashedPassword = await validateAndHashPassword(req.body.password);
+        validateDateOfBirth(req.body.dateOfBirth)
+        const parsedDate = moment.utc(req.body.dateOfBirth, "DD/MM/YYYY").toDate();
 
         const newUser = new UserModel({
             firstName: req.body.firstName,
             lastName: req.body.lastName,
             email: req.body.email,
             password: hashedPassword,
-            dateOfBirth: req.body.dateOfBirth,
-            profileImage: req.body.profileImage,
+            dateOfBirth: parsedDate,
+            profilepImage: req.body.profileImage,
             address: {
                 street: req.body.address?.street,
                 city: req.body.address?.city,
@@ -33,6 +35,9 @@ export const register = async (req, res, next) => {
         // Save the new user to the database
         const savedUser = await newUser.save();
         const userObject = savedUser.toObject(); // Convert the Mongoose document to a plain JavaScript object
+        if (userObject.dateOfBirth) {
+            userObject.dateOfBirth = moment.utc(userObject.dateOfBirth).format('DD/MM/YYYY');
+        }
         delete userObject.password; // Remove the password
         delete userObject.isAdmin;  // Remove the isAdmin field
         res.status(201).json({ message: "User registered successfully!", user: userObject });
