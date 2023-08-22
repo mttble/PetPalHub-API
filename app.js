@@ -14,7 +14,13 @@ const app = express()
 
 app.use(cookieParser())
 
-app.use(cors())
+
+const corsOptions = {
+    credentials: true,
+    origin: 'http://localhost:5173'
+}
+
+app.use(cors(corsOptions))
 
 app.use(express.json())
 
