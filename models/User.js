@@ -25,6 +25,7 @@ const userSchema = new mongoose.Schema({
         minlength: [8, 'Password should be at least 8 characters long'],
     },
     dateOfBirth: {
+        required: false,
         type: Date,
     },
     profileImage: {

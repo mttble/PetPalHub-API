@@ -24,7 +24,11 @@ export const register = async (req, res, next) => {
                 return res.json({error: "Password must contain: at least one lowercase letter, one uppercase letter, one number, one special character and be at least 8 characters in length"})
             }
 
-            const parsedDate = moment.utc(req.body.dateOfBirth, "DD/MM/YYYY").toDate();
+            let parsedDate
+            if (req.body.dateOfBirth) {
+                parsedDate = moment.utc(req.body.dateOfBirth, "DD/MM/YYYY").toDate()}
+            else {parsedDate = undefined}
+            
 
             const newUser = new UserModel({
                 firstName: req.body.firstName,
@@ -32,7 +36,7 @@ export const register = async (req, res, next) => {
                 email: req.body.email,
                 password: hashedPassword,
                 dateOfBirth: parsedDate,
-                profilepImage: req.body.profileImage,
+                profileImage: req.body.profileImage,
                 address: {
                     street: req.body.address?.street,
                     city: req.body.address?.city,
@@ -73,7 +77,10 @@ export const register = async (req, res, next) => {
                 return res.json({error: "Password must contain: at least one lowercase letter, one uppercase letter, one number, one special character and be at least 8 characters in length"})
             }
 
-            const parsedDate = moment.utc(req.body.dateOfBirth, "DD/MM/YYYY").toDate();
+            let parsedDate
+            if (req.body.dateOfBirth) {
+                parsedDate = moment.utc(req.body.dateOfBirth, "DD/MM/YYYY").toDate()}
+            else {parsedDate = undefined}
 
             const newCarer = new CarerModel({
                 firstName: req.body.firstName,
