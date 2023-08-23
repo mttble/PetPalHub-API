@@ -95,12 +95,10 @@ export const login = async (req, res, next) => {
         const { password: userPassword, ...otherDetails } = foundUser._doc;
 
         // Create and send an authentication token
-        const token = jwt.sign({ id: foundUser._id, role: foundUser.role }, process.env.JWT_SECRET);
-        res.cookie("access_token", token, { 
-            httpOnly: true,
-            sameSite : 'none',
-            secure: true,
-         }).status(200).json({ ...otherDetails });
+        const token = jwt.sign({ id: foundUser._id, firstName: foundUser.firstName, role: foundUser.role, email: foundUser.email }, process.env.JWT_SECRET, {}, (err, token) => {
+            res.cookie('token', token, {httpOnly: true, sameSite: 'none', secure: true}).json(foundUser)
+        });
+
 
     } catch (err) {
         console.error("Error during login:", err);
@@ -108,3 +106,14 @@ export const login = async (req, res, next) => {
     }
 }
 
+export const getProfile = (req, res) => {
+    const {token} = req.cookies
+    if (token) {
+        jwt.verify(token, process.env.JWT_SECRET, {}, (err, user) => {
+            if (err) throw err
+            res.json(user)
+        })
+    } else {
+        res.json(null)
+    }
+}

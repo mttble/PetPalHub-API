@@ -4,7 +4,7 @@ import cookieParser from 'cookie-parser'
 import usersRoutes from './routes/usersRoute.js'
 
 import { verifyUserOnlyToken } from './utils/verifyToken.js';
-import { register, login } from './controllers/auth.js'
+import { register, login, getProfile } from './controllers/auth.js'
 import { petcreation } from './controllers/pet.js'
 
 
@@ -28,6 +28,8 @@ app.use('/user', usersRoutes)
 app.post('/login', login)
 
 app.post('/petcreation', verifyUserOnlyToken, petcreation)
+
+app.use('/profile', getProfile)
 
 
 
