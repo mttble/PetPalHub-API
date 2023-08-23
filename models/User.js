@@ -73,9 +73,9 @@ const userSchema = new mongoose.Schema({
         enum: ['Active', 'Inactive', 'Banned'],
         default: 'Active',
     },
-    isCarer: {
-        type: Boolean,
-        default: 'false',
+    role: {
+        type: String,
+        default: 'user',
     },
 });
 
