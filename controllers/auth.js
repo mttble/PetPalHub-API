@@ -1,32 +1,39 @@
 import {UserModel} from "../models/User.js"
+import {CarerModel} from "../models/Carer.js"
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
-import createError from 'http-errors';
+import moment from 'moment';
+import { checkExistingEmail, validateAndHashPassword, validateDateOfBirth } from '../utils/validation.js'
 
 export const test = async (req, res, next) => {
     res.json('test is working')
 }
 
 export const register = async (req, res, next) => {
+    const Model = req.body.role === 'user' ? UserModel : CarerModel;
+    const roleMessage = req.body.role === 'user' ? 'User' : 'Carer';
+    
     try {
-        // Check if the email already exists
-        const existingUser = await UserModel.findOne({ email: req.body.email });
-        if (existingUser) {
-            return res.status(400).json({ message: "Email is already in use." });
+        const emailExists = await checkExistingEmail(req.body.email, Model);
+        if (emailExists) {
+            return res.json({error: `Email already exists as ${roleMessage}`});
         }
 
-        //generate salt for password
-        const salt = await bcrypt.genSalt(10);
-        //combine the salt and the hashed password
-        const hashedPassword = await bcrypt.hash(req.body.password, salt);
+        const hashedPassword = await validateAndHashPassword(req.body.password);
+        validateDateOfBirth(req.body.dateOfBirth);
+        
+        if (hashedPassword === false) {
+            return res.json({error: "Password must contain: at least one lowercase letter, one uppercase letter, one number, one special character and be at least 8 characters in length"});
+        }
 
+        let parsedDate = req.body.dateOfBirth ? moment.utc(req.body.dateOfBirth, "DD/MM/YYYY").toDate() : undefined;
 
-        const newUser = new UserModel({
+        const details = {
             firstName: req.body.firstName,
             lastName: req.body.lastName,
             email: req.body.email,
             password: hashedPassword,
-            dateOfBirth: req.body.dateOfBirth,
+            dateOfBirth: parsedDate,
             profileImage: req.body.profileImage,
             address: {
                 street: req.body.address?.street,
@@ -36,33 +43,93 @@ export const register = async (req, res, next) => {
                 country: req.body.address?.country
             },
             phoneNumber: req.body.phoneNumber,
-            bio: req.body.bio
-        });
+            bio: req.body.bio,
+            role: req.body.role
+        };
 
-        // Save the new user to the database
-        const savedUser = await newUser.save();
-        const userObject = savedUser.toObject(); // Convert the Mongoose document to a plain JavaScript object
-        delete userObject.password; // Remove the password
-        delete userObject.isAdmin;  // Remove the isAdmin field
-        res.status(201).json({ message: "User registered successfully!", user: userObject });
+        const newRegister = new Model(details);
+        const savedRegister = await newRegister.save();
+
+        const registerObject = savedRegister.toObject();
+        if (registerObject.dateOfBirth) {
+            registerObject.dateOfBirth = moment.utc(registerObject.dateOfBirth).format('DD/MM/YYYY');
+        }
+        delete registerObject.password;
+
+        res.status(201).json({ message: `${roleMessage} registered successfully!`, register: registerObject });
 
     } catch (error) {
-        // Catch any errors and send an error response
-        res.status(500).json({ message: "Error registering the user", error: error.message });
+        console.error("Error:", error);
+        res.status(500).json({ message: `Error registering the ${roleMessage}`, error: error.message });
     }
 }
 
 
+// export const login = async (req, res, next) => {
+//     try {
+//         const user = await UserModel.findOne({email:req.body.email})
+//         if(!user)
+//             return res.json({
+//                 error: "User not found"
+//         })
+
+//         const isPasswordCorrect = await bcrypt.compare(req.body.password, user.password)
+//         if(!isPasswordCorrect)
+//             return res.json({
+//                 error: "Password is incorrect"
+//             })
+//         if (isPasswordCorrect) {
+//             res.json('Passwords match')
+//         }
+
+
+//         const {password, isAdmin, ...otherDetails} = user._doc
+
+//         const token = jwt.sign({id:user._id, role:req.body.role}, process.env.JWT_SECRET, {}, (err, token) => {
+//         if(err) throw err;
+//         res.cookie("access_token", token,{httpOnly: true,}).status(200).json({...otherDetails})
+//         })
+//     }catch(err){
+//         next(err);
+//     }
+// }
+
+
 export const login = async (req, res, next) => {
     try {
-        const user = await UserModel.findOne({email:req.body.email})
-        if(!user) return next(createError(404, "User not found"))
+        // Determine which model to use based on the role provided
+        let model;
+        if (req.body.role === 'user') {
+            model = UserModel;
+        } else if (req.body.role === 'carer') {
+            model = CarerModel;
+        } else {
+            return res.status(400).json({ error: "Invalid role specified" });
+        }
 
-        const isPasswordCorrect = await bcrypt.compare(req.body.password, user.password)
-        if(!isPasswordCorrect) return next(createError(400, "Wrong password or username!"))
+        const user = await model.findOne({ email: req.body.email });
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
 
-        res.status(200).json(user)
-    }catch(err){
+        const isPasswordCorrect = await bcrypt.compare(req.body.password, user.password);
+        if (!isPasswordCorrect) {
+            return res.status(401).json({ error: "Password is incorrect" });
+        }
+
+        // Destructuring the user details and excluding password and any other sensitive information
+        const { password, ...otherDetails } = user._doc;
+
+        const token = jwt.sign({ id: user._id, role: req.body.role }, process.env.JWT_SECRET, {}, (err, token) => {
+            if (err) {
+                console.error("Error generating JWT token:", err);
+                return res.status(500).json({ error: "Error generating authentication token" });
+            }
+            res.cookie("access_token", token, { httpOnly: true }).status(200).json({ ...otherDetails });
+        });
+
+    } catch (err) {
+        console.error("Error during login:", err);
         next(err);
     }
 }
