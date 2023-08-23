@@ -25,7 +25,11 @@ export const petcreation = async (req, res) => {
         const savedPet = await pet.save();
         res.status(201).send(savedPet);
     } catch (err) {
+        if(err.code === 11000){
+            res.status(400).send("A pet with this name already exists for this user")
+        }else{
         res.status(400).send(err.message);
+        }
     }
 }
 
