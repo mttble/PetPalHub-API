@@ -44,7 +44,7 @@ app.post('/register', register)
 app.use('/user', usersRoutes)
 app.post('/login', login)
 
-app.post('/petcreation', verifyUserOnlyToken, petcreation)
+app.post('/petcreation', verifyUserOnlyToken, upload.single('petImage'), petcreation)
 
 
 
