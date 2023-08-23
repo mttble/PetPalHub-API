@@ -6,8 +6,8 @@ import multer from 'multer'
 
 
 import { verifyUserOnlyToken } from './utils/verifyToken.js';
-import { register, login } from './controllers/auth.js'
-import { petcreation, uploadpetimage} from './controllers/pet.js'
+import { register, login, getProfile } from './controllers/auth.js'
+import { petcreation, uploadpetimage } from './controllers/pet.js'
 
 
 const app = express()
@@ -44,9 +44,7 @@ app.post('/register', register)
 app.use('/user', usersRoutes)
 app.post('/login', login)
 
-
-app.post('/petcreation', verifyUserOnlyToken, upload.single('petImage'), petcreation);
-
+app.post('/petcreation', verifyUserOnlyToken, petcreation)
 
 
 
