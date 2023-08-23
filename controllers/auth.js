@@ -65,33 +65,71 @@ export const register = async (req, res, next) => {
 }
 
 
+// export const login = async (req, res, next) => {
+//     try {
+//         const user = await UserModel.findOne({email:req.body.email})
+//         if(!user)
+//             return res.json({
+//                 error: "User not found"
+//         })
+
+//         const isPasswordCorrect = await bcrypt.compare(req.body.password, user.password)
+//         if(!isPasswordCorrect)
+//             return res.json({
+//                 error: "Password is incorrect"
+//             })
+//         if (isPasswordCorrect) {
+//             res.json('Passwords match')
+//         }
+
+
+//         const {password, isAdmin, ...otherDetails} = user._doc
+
+//         const token = jwt.sign({id:user._id, role:req.body.role}, process.env.JWT_SECRET, {}, (err, token) => {
+//         if(err) throw err;
+//         res.cookie("access_token", token,{httpOnly: true,}).status(200).json({...otherDetails})
+//         })
+//     }catch(err){
+//         next(err);
+//     }
+// }
+
+
 export const login = async (req, res, next) => {
     try {
-        const user = await UserModel.findOne({email:req.body.email})
-        if(!user)
-            return res.json({
-                error: "User not found"
-        })
-
-        const isPasswordCorrect = await bcrypt.compare(req.body.password, user.password)
-        if(!isPasswordCorrect)
-            return res.json({
-                error: "Password is incorrect"
-            })
-        if (isPasswordCorrect) {
-            res.json('Passwords match')
+        // Determine which model to use based on the role provided
+        let model;
+        if (req.body.role === 'user') {
+            model = UserModel;
+        } else if (req.body.role === 'carer') {
+            model = CarerModel;
+        } else {
+            return res.status(400).json({ error: "Invalid role specified" });
         }
 
+        const user = await model.findOne({ email: req.body.email });
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
 
-        const {password, isAdmin, ...otherDetails} = user._doc
+        const isPasswordCorrect = await bcrypt.compare(req.body.password, user.password);
+        if (!isPasswordCorrect) {
+            return res.status(401).json({ error: "Password is incorrect" });
+        }
 
-        const token = jwt.sign({id:user._id, isCarer:req.body.isCarer}, process.env.JWT_SECRET, {}, (err, token) => {
-        if(err) throw err;
-        res.cookie("access_token", token,{httpOnly: true,}).status(200).json({...otherDetails})
-        })
-    }catch(err){
+        // Destructuring the user details and excluding password and any other sensitive information
+        const { password, ...otherDetails } = user._doc;
+
+        const token = jwt.sign({ id: user._id, role: req.body.role }, process.env.JWT_SECRET, {}, (err, token) => {
+            if (err) {
+                console.error("Error generating JWT token:", err);
+                return res.status(500).json({ error: "Error generating authentication token" });
+            }
+            res.cookie("access_token", token, { httpOnly: true }).status(200).json({ ...otherDetails });
+        });
+
+    } catch (err) {
+        console.error("Error during login:", err);
         next(err);
     }
 }
-
-
