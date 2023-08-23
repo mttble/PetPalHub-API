@@ -1,19 +1,16 @@
 import express from 'express'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
-import authRoutes from './routes/authRoute.js'
 import usersRoutes from './routes/usersRoute.js'
 
-
+import { verifyUserOnlyToken } from './utils/verifyToken.js';
 import { register, login } from './controllers/auth.js'
+import { petcreation } from './controllers/pet.js'
 
 
 const app = express()
 
-
-
 app.use(cookieParser())
-
 
 const corsOptions = {
     credentials: true,
@@ -26,13 +23,12 @@ app.use(express.json())
 
 app.get('/', app.get('/', (request, response) => response.send({ info: 'API!' })))
 
-app.use('/auth', authRoutes)
-
-app.get('/test', authRoutes)
-
 app.post('/register', register)
 app.use('/user', usersRoutes)
 app.post('/login', login)
+
+app.post('/petcreation', verifyUserOnlyToken, petcreation)
+
 
 
 
