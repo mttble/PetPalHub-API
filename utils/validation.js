@@ -1,12 +1,16 @@
 // userValidations.js
 import bcrypt from "bcrypt";
 
-export const checkExistingEmail = async (email, UserModel) => {
-    const existingUser = await UserModel.findOne({ email });
-    if (existingUser) {
-      return !!existingUser
-    }
+export const checkExistingEmail = async (email, UserModel, CarerModel) => {
+  const existingUser = await UserModel.findOne({ email });
+  const existingCarer = await CarerModel.findOne({ email });
+
+  if (existingUser || existingCarer) {
+      return true
   }
+
+  return false
+}
 
 export const validateAndHashPassword = async (password) => {
   const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
