@@ -1,6 +1,8 @@
 import { PetModel } from '../models/Pet.js';
 
 export const petcreation = async (req, res) => {
+    // console.log(req.body);
+
     let imageUrl = "";
 
     if (req.file) {
