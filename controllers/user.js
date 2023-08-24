@@ -2,7 +2,7 @@ import { sendEmail } from '../utils/email.js'
 
 export const booking = async (req, res) => {
     try {
-        const { carerId, startDate, endDate } = req.body;
+        const { carerId, startDate, endDate, petIds } = req.body;
         const userId = req.user.id;
 
         
@@ -13,6 +13,7 @@ export const booking = async (req, res) => {
         const booking = new BookingModel({
             userId,
             carerId,
+            petIds,
             startDate,
             endDate
         });

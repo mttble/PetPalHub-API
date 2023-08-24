@@ -11,6 +11,10 @@ const bookingSchema = new mongoose.Schema({
         ref: 'Carer',
         required: true
     },
+    petIds: [{ 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'Pet' 
+    }], //allow multiple pets
     status: {
         type: String,
         enum: ['Pending', 'Approved', 'Declined'],
