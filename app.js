@@ -5,8 +5,9 @@ import usersRoutes from './routes/usersRoute.js'
 import multer from 'multer'
 
 
-import { verifyUserOnlyToken } from './utils/verifyToken.js';
-import { register, login, getProfile } from './controllers/auth.js'
+import { verifyToken } from './utils/verifyToken.js';
+import { register, login } from './controllers/auth.js'
+import { getProfile } from './controllers/auth.js'
 import { petcreation, uploadpetimage } from './controllers/pet.js'
 
 
@@ -42,9 +43,9 @@ app.get('/', app.get('/', (request, response) => response.send({ info: 'API!' })
 
 app.post('/register', register)
 app.use('/user', usersRoutes)
-app.post('/login', login)
+app.post('/login', login,)
 
-app.post('/petcreation', verifyUserOnlyToken, upload.single('petImage'), petcreation)
+app.post('/petcreation', verifyToken, upload.single('petImage'), petcreation)
 
 
 
