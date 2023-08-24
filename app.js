@@ -47,7 +47,7 @@ app.get('/', app.get('/', (request, response) => response.send({ info: 'API!' })
 app.post('/register', register)
 app.post('/login', login,)
 
-app.post('/booking', booking)
+app.post('/booking', verifyToken, booking)
 
 app.use('/user', usersRoutes)
 
