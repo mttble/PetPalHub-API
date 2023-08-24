@@ -120,3 +120,4 @@ export const getProfile = (req, res) => {
         res.json(null)
     }
 }
+

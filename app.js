@@ -34,20 +34,20 @@ const upload = multer({ storage: storage });
 
 
 app.use(cors(corsOptions))
-
 app.use(express.json())
+app.use('/user', usersRoutes)
 app.use('/uploads', express.static('uploads'));
+
 
 
 app.get('/', app.get('/', (request, response) => response.send({ info: 'API!' })))
 
 app.post('/register', register)
-app.use('/user', usersRoutes)
 app.post('/login', login,)
 
+
+
 app.post('/petcreation', verifyToken, upload.single('petImage'), petcreation)
-
-
 
 
 export default app

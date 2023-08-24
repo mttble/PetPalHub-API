@@ -1,9 +1,6 @@
 import express from 'express';
 import {verifyToken} from '../utils/verifyToken.js';
 import { getProfile } from '../controllers/auth.js';
-import { UserModel } from '../models/User.js';
-import { PetModel } from '../models/Pet.js';
-
 const router = express.Router();
 
 router.get('/profile', getProfile)
