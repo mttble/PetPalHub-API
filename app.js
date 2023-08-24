@@ -2,6 +2,7 @@ import express from 'express'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import usersRoutes from './routes/usersRoute.js'
+import carersRoutes from './routes/carersRoute.js'
 import multer from 'multer'
 import jwt from "jsonwebtoken"
 
@@ -35,9 +36,11 @@ const upload = multer({ storage: storage });
 
 
 app.use(cors(corsOptions))
-
 app.use(express.json())
+app.use('/user', usersRoutes)
+app.use('/carer', carersRoutes)
 app.use('/uploads', express.static('uploads'));
+
 
 
 app.get('/', app.get('/', (request, response) => response.send({ info: 'API!' })))
@@ -47,6 +50,8 @@ app.post('/login', login,)
 
 
 app.use('/user', usersRoutes)
+
+
 
 
 app.post('/petcreation', verifyToken, upload.single('petImage'), petcreation)

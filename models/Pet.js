@@ -44,6 +44,7 @@ const petSchema = new mongoose.Schema({
     },
 });
 
+petSchema.index({ ownerId: 1, petName: 1 }, { unique: true });
 
 const PetModel = mongoose.model('Pet', petSchema);
 

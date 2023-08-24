@@ -4,10 +4,10 @@ import jwt from "jsonwebtoken"
 export const verifyToken = (req, res, next) => {
     const userToken = req.cookies.userToken;
     const carerToken = req.cookies.carerToken;
-    console.log('hello')
 
-    if (!userToken && !carerToken) { // Check if both tokens are not present
-        return res.status(401).send("You're not logged in!");
+
+    if(!userToken && !carerToken){
+        return res.status(401).send("You're not logged in!")
     }
 
     const tokenToVerify = userToken || carerToken;
@@ -17,6 +17,9 @@ export const verifyToken = (req, res, next) => {
             return res.status(401).send("Invalid Token!");
         }
         req.user = user;
-        next();
-    });
-};
+        next()
+        }
+    )
+}
+
+

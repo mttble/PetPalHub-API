@@ -98,6 +98,10 @@ export const login = async (req, res, next) => {
             const { password: userPassword, ...otherDetails } = foundUser._doc;
 
         // Create and send an authentication token
+            const token = jwt.sign({ id: foundUser._id, firstName: foundUser.firstName, role: foundUser.role, email: foundUser.email }, process.env.JWT_SECRET, {}, (err, token) => {
+                const userObject = foundUser.toObject();
+                const { password, ...userWithoutPassword } = userObject;
+                res.cookie(tokenName, token, {httpOnly: true, sameSite: 'none', secure: true}).json(userWithoutPassword);
             const token = jwt.sign({ id: foundUser._id, firstName: foundUser.firstName, role: foundUser.role, email: foundUser.email }, process.env.JWT_SECRET, {expiresIn: '1h'}, (err, token) => {
             res.cookie(tokenName, token, {httpOnly: true, sameSite: 'none', secure: true}).json(foundUser)
         });
@@ -128,4 +132,5 @@ export const getProfile = (req, res) => {
         // No token found in cookies
         res.status(401).json({ error: "Unauthorized" });
     }
-};
+}
+
