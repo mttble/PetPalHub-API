@@ -77,11 +77,15 @@ export const login = async (req, res, next) => {
         }
 
         // Determine which model to use based on the found user or carer
-        let model;
+        let model, role, tokenName;
         if (user) {
             model = UserModel;
+            role = 'user'
+            tokenName = "userToken"
         } else if (carer) {
             model = CarerModel;
+            role = 'carer'
+            tokenName = "carerToken"
         }
 
         // Check if the provided password matches the stored hash
@@ -89,16 +93,15 @@ export const login = async (req, res, next) => {
         const isPasswordCorrect = await bcrypt.compare(password, foundUser.password);
         if (!isPasswordCorrect) {
             return res.status(404).json({ error: "Password is incorrect" });
-        }
-
-        // Destructuring the user details and excluding password and any other sensitive information
-        const { password: userPassword, ...otherDetails } = foundUser._doc;
+        } else if (isPasswordCorrect) {
+            // Destructuring the user details and excluding password and any other sensitive information
+            const { password: userPassword, ...otherDetails } = foundUser._doc;
 
         // Create and send an authentication token
-        const token = jwt.sign({ id: foundUser._id, firstName: foundUser.firstName, role: foundUser.role, email: foundUser.email }, process.env.JWT_SECRET, {}, (err, token) => {
-            res.cookie('token', token, {httpOnly: true, sameSite: 'none', secure: true}).json(foundUser)
+            const token = jwt.sign({ id: foundUser._id, firstName: foundUser.firstName, role: foundUser.role, email: foundUser.email }, process.env.JWT_SECRET, {}, (err, token) => {
+            res.cookie(tokenName, token, {httpOnly: true, sameSite: 'none', secure: true}).json(foundUser)
         });
-
+        }
 
     } catch (err) {
         console.error("Error during login:", err);
