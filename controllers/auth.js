@@ -99,7 +99,9 @@ export const login = async (req, res, next) => {
 
         // Create and send an authentication token
             const token = jwt.sign({ id: foundUser._id, firstName: foundUser.firstName, role: foundUser.role, email: foundUser.email }, process.env.JWT_SECRET, {}, (err, token) => {
-            res.cookie(tokenName, token, {httpOnly: true, sameSite: 'none', secure: true}).json(foundUser)
+                const userObject = foundUser.toObject();
+                const { password, ...userWithoutPassword } = userObject;
+                res.cookie(tokenName, token, {httpOnly: true, sameSite: 'none', secure: true}).json(userWithoutPassword);
         });
         }
 
@@ -120,3 +122,4 @@ export const getProfile = (req, res) => {
         res.json(null)
     }
 }
+
