@@ -2,6 +2,7 @@ import express from 'express'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import usersRoutes from './routes/usersRoute.js'
+import carersRoutes from './routes/carersRoute.js'
 import multer from 'multer'
 
 
@@ -36,6 +37,7 @@ const upload = multer({ storage: storage });
 app.use(cors(corsOptions))
 app.use(express.json())
 app.use('/user', usersRoutes)
+app.use('/carer', carersRoutes)
 app.use('/uploads', express.static('uploads'));
 
 
