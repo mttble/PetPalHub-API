@@ -1,4 +1,5 @@
 import { PetModel } from '../models/Pet.js';
+import fs from 'fs'
 
 export const petcreation = async (req, res) => {
     // console.log(req.body);
@@ -25,6 +26,11 @@ export const petcreation = async (req, res) => {
         const savedPet = await pet.save();
         res.status(201).send(savedPet);
     } catch (err) {
+        // delete the upload image if errors occur when saving to database
+        if(req.file){
+            fs.unlinkSync(req.file.path)
+        }
+        // error code for violate the unique index set in Schema
         if(err.code === 11000){
             res.status(400).send("A pet with this name already exists for this user")
         }else{
