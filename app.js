@@ -4,6 +4,7 @@ import cookieParser from 'cookie-parser'
 import usersRoutes from './routes/usersRoute.js'
 import carersRoutes from './routes/carersRoute.js'
 import multer from 'multer'
+import jwt from "jsonwebtoken"
 
 
 import { verifyToken } from './utils/verifyToken.js';
@@ -43,13 +44,41 @@ app.use('/uploads', express.static('uploads'));
 
 
 app.get('/', app.get('/', (request, response) => response.send({ info: 'API!' })))
-
 app.post('/register', register)
 app.post('/login', login,)
 
 
 
+app.use('/user', usersRoutes)
+
+
+
+
 app.post('/petcreation', verifyToken, upload.single('petImage'), petcreation)
+
+
+
+
+// Unified profile route with user type as a parameter
+app.get('/profile/:userType', verifyToken, (req, res) => {
+    const tokenName = req.params.userType === 'user' ? 'userToken' : 'carerToken';
+    
+    const token = req.cookies[tokenName];
+
+    if (token) {
+        jwt.verify(token, process.env.JWT_SECRET, (err, decodedToken) => {
+            if (err) {
+                console.error("Error verifying token:", err);
+                res.status(401).json({ error: "Unauthorized" });
+            } else {
+                res.json(decodedToken);
+            }
+        });
+    } else {
+        res.status(401).json({ error: "Unauthorized" });
+    }
+});
+
 
 
 export default app

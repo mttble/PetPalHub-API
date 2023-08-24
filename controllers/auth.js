@@ -1,9 +1,9 @@
-import {UserModel} from "../models/User.js"
-import {CarerModel} from "../models/Carer.js"
-import bcrypt from "bcrypt"
-import jwt from "jsonwebtoken"
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 import moment from 'moment';
-import { checkExistingEmail, validateAndHashPassword, validateDateOfBirth } from '../utils/validation.js'
+import { CarerModel } from "../models/Carer.js";
+import { UserModel } from "../models/User.js";
+import { checkExistingEmail, validateAndHashPassword, validateDateOfBirth } from '../utils/validation.js';
 
 
 export const register = async (req, res, next) => {
@@ -102,8 +102,8 @@ export const login = async (req, res, next) => {
                 const userObject = foundUser.toObject();
                 const { password, ...userWithoutPassword } = userObject;
                 res.cookie(tokenName, token, {httpOnly: true, sameSite: 'none', secure: true}).json(userWithoutPassword);
-        });
-        }
+                });
+            }
 
     } catch (err) {
         console.error("Error during login:", err);
@@ -112,14 +112,23 @@ export const login = async (req, res, next) => {
 }
 
 export const getProfile = (req, res) => {
-    const {token} = req.cookies
+    const tokenName = req.baseUrl === '/users' ? 'userToken' : 'carerToken'; // Adjust based on the route
+    const token = req.cookies[tokenName]; // Get the token from the cookies
+
     if (token) {
-        jwt.verify(token, process.env.JWT_SECRET, {}, (err, user) => {
-            if (err) throw err
-            res.json(user)
-        })
+        jwt.verify(token, process.env.JWT_SECRET, (err, decodedToken) => {
+            if (err) {
+                // Token verification failed
+                console.error("Error verifying token:", err);
+                res.status(401).json({ error: "Unauthorized" });
+            } else {
+                // Token verification succeeded, return the user's data
+                res.json(decodedToken);
+            }
+        });
     } else {
-        res.json(null)
+        // No token found in cookies
+        res.status(401).json({ error: "Unauthorized" });
     }
 }
 
