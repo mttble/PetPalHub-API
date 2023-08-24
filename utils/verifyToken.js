@@ -5,7 +5,7 @@ export const verifyToken = (req,res,next) => {
     const userToken = req.cookies.userToken
     const carerToken = req.cookies.carerToken
 
-    if(!userToken || !carerToken){
+    if(!userToken && !carerToken){
         return res.status(401).send("You're not logged in!")
     }
 
@@ -19,3 +19,5 @@ export const verifyToken = (req,res,next) => {
         }
     )
 }
+
+
