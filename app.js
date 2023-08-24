@@ -9,7 +9,7 @@ import jwt from "jsonwebtoken"
 
 import { verifyToken } from './utils/verifyToken.js';
 import { register, login } from './controllers/auth.js'
-import { getProfile } from './controllers/auth.js'
+import { booking } from './controllers/user.js'
 import { petcreation, uploadpetimage } from './controllers/pet.js'
 
 
@@ -47,7 +47,7 @@ app.get('/', app.get('/', (request, response) => response.send({ info: 'API!' })
 app.post('/register', register)
 app.post('/login', login,)
 
-
+app.post('/booking', booking)
 
 app.use('/user', usersRoutes)
 
@@ -55,8 +55,6 @@ app.use('/user', usersRoutes)
 
 
 app.post('/petcreation', verifyToken, upload.single('petImage'), petcreation)
-
-
 
 
 // Unified profile route with user type as a parameter
