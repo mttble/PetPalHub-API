@@ -4,6 +4,7 @@ import moment from 'moment';
 import { CarerModel } from "../models/Carer.js";
 import { UserModel } from "../models/User.js";
 import { checkExistingEmail, validateAndHashPassword, validateDateOfBirth } from '../utils/validation.js';
+import { JWT_SECRET } from '../config.js'
 
 
 export const register = async (req, res, next) => {
@@ -98,7 +99,7 @@ export const login = async (req, res, next) => {
             const { password: userPassword, ...otherDetails } = foundUser._doc;
 
         // Create and send an authentication token
-            const token = jwt.sign({ id: foundUser._id, firstName: foundUser.firstName, role: foundUser.role, email: foundUser.email }, process.env.JWT_SECRET, {}, (err, token) => {
+            const token = jwt.sign({ id: foundUser._id, firstName: foundUser.firstName, role: foundUser.role, email: foundUser.email }, JWT_SECRET, {}, (err, token) => {
                 const userObject = foundUser.toObject();
                 const { password, ...userWithoutPassword } = userObject;
                 res.cookie(tokenName, token, {httpOnly: true, sameSite: 'none', secure: true}).json(userWithoutPassword);
