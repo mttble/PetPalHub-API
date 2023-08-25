@@ -7,10 +7,10 @@ import carersRoutes from './routes/carersRoute.js'
 import usersRoutes from './routes/usersRoute.js'
 
 
-import { verifyToken } from './utils/verifyToken.js';
-import { register, login } from './controllers/auth.js'
+import { login, register } from './controllers/auth.js'
+import { petcreation } from './controllers/pet.js'
 import { booking } from './controllers/user.js'
-import { petcreation, uploadpetimage } from './controllers/pet.js'
+import { verifyToken } from './utils/verifyToken.js'
 
 import { CarerModel } from './models/Carer.js'
 import { UserModel } from './models/User.js'
