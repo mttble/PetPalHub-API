@@ -1,6 +1,7 @@
 import express from 'express';
 import {verifyToken} from '../utils/verifyToken.js';
 import { CarerModel } from '../models/Carer.js';
+import { CarerProfileModel } from '../models/CarerProfile.js';
 
 const router = express.Router();
 
@@ -23,13 +24,19 @@ router.get('/context',verifyToken, async (req, res, next) => {
     }
 })
 
-
-
-
-
-
 export default router
 
 
 
+router.post('/profile', async (req, res) => {
+    try {
+      const profileData = req.body;
+      const newCarerProfile = new CarerProfileModel(profileData);
+      await newCarerProfile.save();
+      res.status(201).send({ message: 'Profile created successfully!' });
+    } catch (error) {
+        console.error("Error while creating profile:", error);
+        res.status(500).send({ message: 'Failed to create profile.', error: error.message });
+      }
+  });
 

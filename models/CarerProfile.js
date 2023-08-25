@@ -6,7 +6,7 @@ const carerProfileSchema = new mongoose.Schema({
         trim: true,
     },
     additionalServices: {
-        type: String,
+        type: [String],
         trim: true,
     },
     aboutMe: {
