@@ -7,11 +7,13 @@ import carersRoutes from './routes/carersRoute.js'
 import usersRoutes from './routes/usersRoute.js'
 
 
-import { login, register } from './controllers/auth.js'
-import { petcreation } from './controllers/pet.js'
+import { verifyToken } from './utils/verifyToken.js';
+import { register, login } from './controllers/auth.js'
+import { booking } from './controllers/user.js'
+import { petcreation, uploadpetimage } from './controllers/pet.js'
+
 import { CarerModel } from './models/Carer.js'
 import { UserModel } from './models/User.js'
-import { verifyToken } from './utils/verifyToken.js'
 
 
 const app = express()
@@ -48,7 +50,7 @@ app.get('/', app.get('/', (request, response) => response.send({ info: 'API!' })
 app.post('/register', register)
 app.post('/login', login,)
 
-
+app.post('/booking', verifyToken, booking)
 
 app.use('/user', usersRoutes)
 
@@ -56,8 +58,6 @@ app.use('/user', usersRoutes)
 
 
 app.post('/petcreation', verifyToken, upload.single('petImage'), petcreation)
-
-
 
 
 // Unified profile route with user type as a parameter
