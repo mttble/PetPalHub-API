@@ -46,15 +46,13 @@ app.use('/uploads', express.static('uploads'));
 
 
 
-app.get('/', app.get('/', (request, response) => response.send({ info: 'API!' })))
 app.post('/register', register)
 app.post('/login', login,)
 
 app.post('/booking', verifyToken, booking)
 
 app.use('/user', usersRoutes)
-
-
+app.use('/carer', carersRoutes)
 
 
 app.post('/petcreation', verifyToken, upload.single('petImage'), petcreation)
