@@ -1,16 +1,19 @@
-import express from 'express'
-import cors from 'cors'
 import cookieParser from 'cookie-parser'
-import usersRoutes from './routes/usersRoute.js'
-import carersRoutes from './routes/carersRoute.js'
-import multer from 'multer'
+import cors from 'cors'
+import express from 'express'
 import jwt from "jsonwebtoken"
+import multer from 'multer'
+import carersRoutes from './routes/carersRoute.js'
+import usersRoutes from './routes/usersRoute.js'
 
 
-import { verifyToken } from './utils/verifyToken.js';
-import { register, login } from './controllers/auth.js'
+import { login, register } from './controllers/auth.js'
+import { petcreation } from './controllers/pet.js'
 import { booking } from './controllers/user.js'
-import { petcreation, uploadpetimage } from './controllers/pet.js'
+import { verifyToken } from './utils/verifyToken.js'
+
+import { CarerModel } from './models/Carer.js'
+import { UserModel } from './models/User.js'
 
 
 const app = express()
@@ -58,22 +61,24 @@ app.post('/petcreation', verifyToken, upload.single('petImage'), petcreation)
 
 
 // Unified profile route with user type as a parameter
-app.get('/profile/:userType', verifyToken, (req, res) => {
-    const tokenName = req.params.userType === 'user' ? 'userToken' : 'carerToken';
-    
-    const token = req.cookies[tokenName];
+app.get('/profile',  (req, res) => {
+    const carerToken = req.cookies.carerToken;
+    const userToken = req.cookies.userToken;
 
-    if (token) {
-        jwt.verify(token, process.env.JWT_SECRET, (err, decodedToken) => {
-            if (err) {
-                console.error("Error verifying token:", err);
-                res.status(401).json({ error: "Unauthorized" });
-            } else {
-                res.json(decodedToken);
-            }
-        });
+    if (carerToken) {
+        jwt.verify(carerToken, process.env.JWT_SECRET, async (err, user) => {
+            if (err) throw err;
+            const {firstName, email, _id, role} = await CarerModel.findById(user.id)
+            res.json({firstName, email, _id, role})
+        })
+    } else if (userToken) {
+        jwt.verify(userToken, process.env.JWT_SECRET, async (err, user) => {
+            if (err) throw err;
+            const {firstName, email, _id, role} = await UserModel.findById(user.id)
+            res.json({firstName, email, _id, role})
+        })
     } else {
-        res.status(401).json({ error: "Unauthorized" });
+        res.json(null)
     }
 });
 
