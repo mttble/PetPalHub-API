@@ -2,6 +2,7 @@ import express from 'express';
 import {verifyToken} from '../utils/verifyToken.js';
 import { CarerModel } from '../models/Carer.js';
 import { CarerProfileModel } from '../models/CarerProfile.js';
+import { carerProfileUpload } from '../utils/uploadConfig.js';
 
 const router = express.Router();
 
@@ -28,9 +29,12 @@ export default router
 
 
 
-router.post('/profile', async (req, res) => {
+router.post('/profile',verifyToken, carerProfileUpload.single('avatar'), async (req, res) => {
     try {
       const profileData = req.body;
+      if (req.file) {
+        profileData.profileImage = `/uploads/carer_profile_image/${req.file.filename}`;
+        }
       const newCarerProfile = new CarerProfileModel(profileData);
       await newCarerProfile.save();
       res.status(201).send({ message: 'Profile created successfully!' });

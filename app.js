@@ -2,7 +2,6 @@ import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import express from 'express'
 import jwt from "jsonwebtoken"
-import multer from 'multer'
 import carersRoutes from './routes/carersRoute.js'
 import usersRoutes from './routes/usersRoute.js'
 
@@ -11,6 +10,9 @@ import { login, register } from './controllers/auth.js'
 import { petcreation } from './controllers/pet.js'
 import { booking } from './controllers/user.js'
 import { verifyToken } from './utils/verifyToken.js'
+import { petUpload } from './utils/uploadConfig.js';
+
+
 
 import { CarerModel } from './models/Carer.js'
 import { UserModel } from './models/User.js'
@@ -24,18 +26,6 @@ const corsOptions = {
     credentials: true,
     origin: 'http://localhost:5173'
 }
-
-const storage = multer.diskStorage({
-    destination: function(req, file, cb) {
-        cb(null, 'uploads/');
-    },
-    filename: function(req, file, cb) {
-        cb(null, Date.now() + '-' + file.originalname);
-    }
-});
-
-const upload = multer({ storage: storage });
-
 
 
 app.use(cors(corsOptions))
@@ -53,9 +43,15 @@ app.post('/booking', verifyToken, booking)
 
 app.use('/user', usersRoutes)
 app.use('/carer', carersRoutes)
+app.use((err, req, res, next) => {
+    if (err instanceof multer.MulterError) {
+        return res.status(400).send({ message: 'Error uploading file.' });
+    }
+    next(err);
+});
 
 
-app.post('/petcreation', verifyToken, upload.single('petImage'), petcreation)
+app.post('/petcreation', verifyToken, petUpload.single('petImage'), petcreation)
 
 
 // Unified profile route with user type as a parameter
