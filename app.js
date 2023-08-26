@@ -4,14 +4,12 @@ import express from 'express'
 import jwt from "jsonwebtoken"
 import carersRoutes from './routes/carersRoute.js'
 import usersRoutes from './routes/usersRoute.js'
-import multer from 'multer'
-
-
+import petsRoutes from './routes/petsRoute.js'
+import multer from 'multer';
 import { login, register } from './controllers/auth.js'
-import { petcreation } from './controllers/pet.js'
 import { booking } from './controllers/user.js'
 import { verifyToken } from './utils/verifyToken.js'
-import { petUpload } from './utils/uploadConfig.js';
+
 
 
 
@@ -33,6 +31,7 @@ app.use(cors(corsOptions))
 app.use(express.json())
 app.use('/user', usersRoutes)
 app.use('/carer', carersRoutes)
+app.use('/pet', petsRoutes)
 app.use('/uploads', express.static('uploads'));
 
 
@@ -42,17 +41,6 @@ app.post('/login', login,)
 
 app.post('/booking', verifyToken, booking)
 
-app.use('/user', usersRoutes)
-app.use('/carer', carersRoutes)
-app.use((err, req, res, next) => {
-    if (err instanceof multer.MulterError) {
-        return res.status(400).send({ message: 'Error uploading file.' });
-    }
-    next(err);
-});
-
-
-app.post('/petcreation', verifyToken, petUpload.single('petImage'), petcreation)
 
 
 // Unified profile route with user type as a parameter utilised for useContext in frontend

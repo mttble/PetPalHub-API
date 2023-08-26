@@ -25,9 +25,6 @@ router.get('/context',verifyToken, async (req, res, next) => {
     }
 })
 
-export default router
-
-
 
 router.post('/profile',verifyToken, carerProfileUpload.single('avatar'), async (req, res) => {
 try {
@@ -85,4 +82,6 @@ router.get('/random-profile', async (req, res) => {
     }
 });
 
+
+  export default router
 

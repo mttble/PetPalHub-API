@@ -10,7 +10,7 @@ const petSchema = new mongoose.Schema({
         required: true
     },
     age: {
-        type: Number,
+        type: String,
         required: true
     },
     gender: {
@@ -22,8 +22,8 @@ const petSchema = new mongoose.Schema({
         default: "None"
     },
     emergencyContact: {
-        type: Number,
-        default: "None"
+        type: String,
+        default: "null"
     },
     specialInstructions: {
         type: String,
@@ -36,7 +36,6 @@ const petSchema = new mongoose.Schema({
     ownerId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-        required: true
     },
     createdAt: {
         type: Date,
