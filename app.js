@@ -40,7 +40,7 @@ app.post('/register', register)
 app.post('/login', login,)
 
 app.post('/booking', verifyToken, booking)
-
+app.use('/carer-profiles', carersRoutes);
 
 
 // Unified profile route with user type as a parameter utilised for useContext in frontend
