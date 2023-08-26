@@ -19,13 +19,17 @@ const petSchema = new mongoose.Schema({
     },
     medicalConditions: {
         type: String,
-        default: "None" 
+        default: "None"
     },
     emergencyContact: {
         type: Number,
         default: "None"
     },
     specialInstructions: {
+        type: String,
+        default: "None"
+    },
+    general: {
         type: String,
         default: "None"
     },
@@ -40,7 +44,7 @@ const petSchema = new mongoose.Schema({
     },
     petImage: {
         type: String,
-        default: "" 
+        default: ""
     },
 });
 
