@@ -1,8 +1,8 @@
 import mongoose from 'mongoose';
 
 const carerProfileSchema = new mongoose.Schema({
-    PetType: {
-        type: String,
+    petType: {
+        type: [String],
         trim: true,
     },
     additionalServices: {
@@ -16,6 +16,9 @@ const carerProfileSchema = new mongoose.Schema({
     experience: {
         type: String,
         trim: true,
+    },
+    profileImage: {
+        type: String, 
     },
 })
 

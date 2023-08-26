@@ -28,9 +28,6 @@ const carerSchema = new mongoose.Schema({
         required: false,
         type: Date,
     },
-    profileImage: {
-        type: String, // URL or path to the image file
-    },
     address: {
         street: {
             type: String,
