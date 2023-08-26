@@ -25,9 +25,6 @@ router.get('/context',verifyToken, async (req, res, next) => {
     }
 })
 
-export default router
-
-
 
 router.post('/profile',verifyToken, carerProfileUpload.single('avatar'), async (req, res) => {
     try {
@@ -43,4 +40,6 @@ router.post('/profile',verifyToken, carerProfileUpload.single('avatar'), async (
         res.status(500).send({ message: 'Failed to create profile.', error: error.message });
       }
   });
+
+  export default router
 
