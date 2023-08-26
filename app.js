@@ -54,7 +54,7 @@ app.use((err, req, res, next) => {
 app.post('/petcreation', verifyToken, petUpload.single('petImage'), petcreation)
 
 
-// Unified profile route with user type as a parameter
+// Unified profile route with user type as a parameter utilised for useContext in frontend
 app.get('/profile',  (req, res) => {
     const carerToken = req.cookies.carerToken;
     const userToken = req.cookies.userToken;
