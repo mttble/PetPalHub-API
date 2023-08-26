@@ -25,6 +25,10 @@ const carerProfileSchema = new mongoose.Schema({
         type: String,
         trim: true,
     },
+    location: {
+        type: String,
+        trim: true,
+    },
     profileImage: {
         type: String,
     },
