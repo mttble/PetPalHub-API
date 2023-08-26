@@ -4,6 +4,7 @@ import express from 'express'
 import jwt from "jsonwebtoken"
 import carersRoutes from './routes/carersRoute.js'
 import usersRoutes from './routes/usersRoute.js'
+import multer from 'multer'
 
 
 import { login, register } from './controllers/auth.js'
