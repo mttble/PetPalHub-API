@@ -1,8 +1,8 @@
 import express from 'express';
-import {verifyToken} from '../utils/verifyToken.js';
 import { CarerModel } from '../models/Carer.js';
 import { CarerProfileModel } from '../models/CarerProfile.js';
 import { carerProfileUpload } from '../utils/uploadConfig.js';
+import { verifyToken } from '../utils/verifyToken.js';
 
 const router = express.Router();
 
@@ -61,27 +61,19 @@ router.get('/profile', async (req, res) => {
         }
     });
 
-router.get('/random-profile', async (req, res) => {
+
+
+// for carer profiles to be displayed on homepage
+router.get('/carer-profiles', async (req, res) => {
     try {
-        // Count the total number of profiles in the database
-        const totalProfiles = await CarerProfileModel.countDocuments();
-        if (totalProfiles === 0) {
-            return res.status(404).send({ message: 'No profiles found.' });
-        }
-
-        // Generate a random index between 0 and totalProfiles - 1
-        const randomIndex = Math.floor(Math.random() * totalProfiles);
-
-        // Find the profile at the random index
-        const randomProfile = await CarerProfileModel.findOne().skip(randomIndex);
-
-        res.status(200).send(randomProfile);
+        const carerProfiles = await CarerProfileModel.find();
+        res.json(carerProfiles);
     } catch (error) {
-        console.error("Error while fetching random profile:", error);
-        res.status(500).send({ message: 'Failed to fetch random profile.', error: error.message });
+        console.error('Error fetching carer profiles:', error);
+        res.status(500).send('Server Error');
     }
 });
 
 
-  export default router
+export default router
 
