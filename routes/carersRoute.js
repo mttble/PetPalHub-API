@@ -1,8 +1,8 @@
 import express from 'express';
+import {verifyToken} from '../utils/verifyToken.js';
 import { CarerModel } from '../models/Carer.js';
 import { CarerProfileModel } from '../models/CarerProfile.js';
 import { carerProfileUpload } from '../utils/uploadConfig.js';
-import { verifyToken } from '../utils/verifyToken.js';
 
 const router = express.Router();
 

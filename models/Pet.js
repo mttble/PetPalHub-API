@@ -1,6 +1,14 @@
 import mongoose from 'mongoose';
 
 const petSchema = new mongoose.Schema({
+    ownerId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+    },
+    petType: {
+        type: String,
+        required: true
+    },
     petName: {
         type: String,
         required: true
@@ -32,10 +40,6 @@ const petSchema = new mongoose.Schema({
     general: {
         type: String,
         default: "None"
-    },
-    ownerId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
     },
     createdAt: {
         type: Date,
