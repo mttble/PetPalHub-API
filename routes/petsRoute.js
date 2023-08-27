@@ -35,5 +35,16 @@ router.get('/pet-profiles', async (req, res) => {
   }
 });
 
+router.delete('/:petId', verifyToken, async (req, res) => {
+  try {
+      const petId = req.params.petId;
+      await PetModel.findByIdAndDelete(petId);
+      res.status(200).json({ message: 'Pet deleted successfully.' });
+  } catch (error) {
+      console.error('Error deleting pet:', error);
+      res.status(500).send('Server Error');
+  }
+});
+
 
 export default router
