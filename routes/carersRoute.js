@@ -25,20 +25,45 @@ router.get('/context',verifyToken, async (req, res, next) => {
     }
 })
 
+// creates profile is one doesn't exist or updates with new data if it does
+router.post('/profile', verifyToken, carerProfileUpload.single('avatar'), async (req, res) => {
+    try {
+        const userId = req.body.userId;
+        const profileData = req.body;
 
-router.post('/profile',verifyToken, carerProfileUpload.single('avatar'), async (req, res) => {
-try {
-    const profileData = req.body;
-    if (req.file) {
-    profileData.profileImage = `/uploads/carer_profile_image/${req.file.filename}`;
-    }
-    profileData.userId = req.body.userId
-    const newCarerProfile = new CarerProfileModel(profileData);
-    await newCarerProfile.save();
-    res.status(201).send({ message: 'Profile created successfully!' });
-} catch (error) {
-    console.error("Error while creating profile:", error);
-    res.status(500).send({ message: 'Failed to create profile.', error: error.message });
+        // Check if a profile with the given user ID exists
+        const existingProfile = await CarerProfileModel.findOne({ userId });
+
+        if (existingProfile) {
+            // Profile exists, update it with the new data
+            existingProfile.companyFullName = profileData.companyFullName;
+            existingProfile.location = profileData.location;
+            existingProfile.aboutMe = profileData.aboutMe;
+            existingProfile.experience = profileData.experience; // Fix this line
+            existingProfile.petType = profileData.petType; // Fix this line
+            existingProfile.additionalServices = profileData.additionalServices; // Fix this line
+
+            // Update profile image if a new avatar is provided
+            if (req.file) {
+                existingProfile.profileImage = `/uploads/carer_profile_image/${req.file.filename}`;
+            }
+
+            // Save the updated profile
+            await existingProfile.save();
+
+            res.status(201).send({ message: 'Profile updated successfully!' });
+        } else {
+            // Profile doesn't exist, create a new profile
+            if (req.file) {
+                profileData.profileImage = `/uploads/carer_profile_image/${req.file.filename}`;
+            }
+            const newCarerProfile = new CarerProfileModel(profileData);
+            await newCarerProfile.save();
+            res.status(201).send({ message: 'Profile created successfully!' });
+        }
+    } catch (error) {
+        console.error("Error while creating/updating profile:", error);
+        res.status(500).send({ message: 'Failed to create/update profile.', error: error.message });
     }
 });
 
@@ -47,21 +72,38 @@ router.get('/profile', async (req, res) => {
     const userId = req.query.userId; // Retrieve user ID from the query parameter
 
     try {
-      // Retrieve the profile data from the database based on the userId
+        // Retrieve the profile data from the database based on the userId
         const profileData = await CarerProfileModel.findOne({ userId: userId });
 
         if (!profileData) {
-            return res.status(404).send({ message: 'Profile not found.' });
+            // Return a response indicating that no profile exists
+            return res.status(204).send({ message: 'No profile found.' });
         }
-    
+
         res.status(200).send(profileData);
-        } catch (error) {
+    } catch (error) {
         console.error("Error while fetching profile:", error);
         res.status(500).send({ message: 'Failed to fetch profile data.', error: error.message });
-        }
+    }
+});
+
+
+
+router.delete('/profile', verifyToken, async (req, res) => {
+    try {
+        const userId = req.query.userId; // Retrieve user ID from the query parameter
+        
+        // Find and delete the carer profile based on the user ID
+        await CarerProfileModel.findOneAndDelete({ userId: userId });
+        
+        // Optionally, you can also delete the user's associated data in other models, if needed
+    
+        res.status(200).send({ message: 'Profile deleted successfully!' });
+    } catch (error) {
+        console.error('Error deleting profile:', error);
+        res.status(500).send({ message: 'Failed to delete profile.', error: error.message });
+    }
     });
-
-
 
 // for carer profiles to be displayed on homepage
 router.get('/carer-profiles', async (req, res) => {
