@@ -74,6 +74,17 @@ router.post('/booking', verifyToken, async (req, res) => {
 
 })
 
+router.get('/bookings', async (req, res) => {
+    try {
+      const userId = req.query.userId;
+      const bookings = await BookingModel.find({ userId: userId });
+      res.json(bookings);
+    } catch (error) {
+      console.error('Error fetching bookings:', error);
+      res.status(500).send('Server Error');
+    }
+  });
+  
 
 
 export default router
