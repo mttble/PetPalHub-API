@@ -3,6 +3,7 @@ import {verifyToken} from '../utils/verifyToken.js';
 import { CarerModel } from '../models/Carer.js';
 import { CarerProfileModel } from '../models/CarerProfile.js';
 import { carerProfileUpload } from '../utils/uploadConfig.js';
+import { BookingModel } from '../models/Booking.js';
 
 const router = express.Router();
 
@@ -115,6 +116,57 @@ router.get('/carer-profiles', async (req, res) => {
         res.status(500).send('Server Error');
     }
 });
+
+
+router.get('/carer/:id', async (req, res) => {
+    try {
+        const carer = await CarerModel.findById(req.params.id);
+        if (carer) {
+            res.json(carer);
+        } else {
+            res.status(404).send('Carer not found');
+        }
+    } catch (error) {
+        console.error('Error fetching carer:', error);
+        res.status(500).send('Server Error');
+    }
+});
+
+router.get('/bookings', async (req, res) => {
+    try {
+      const carerId = req.query.carerId;
+      const bookings = await BookingModel.find({ carerId: carerId });
+      res.json(bookings);
+    } catch (error) {
+      console.error('Error fetching bookings for carer:', error);
+      res.status(500).send('Server Error');
+    }
+});
+
+
+router.put('/booking/updateStatus', async (req, res) => {
+    const { bookingId, status } = req.body;
+  
+    // Validate input
+    if (!bookingId || !['Approved', 'Denied'].includes(status)) {
+      return res.status(400).send({ message: 'Invalid input.' });
+    }
+  
+    try {
+      const booking = await BookingModel.findById(bookingId);
+      if (!booking) {
+        return res.status(404).send({ message: 'Booking not found.' });
+      }
+  
+      booking.status = status;
+      await booking.save();
+      console.log(`Booking ID: ${bookingId} status updated to ${status}`); 
+      res.status(200).send({ message: 'Booking status updated successfully.' });
+    } catch (error) {
+        console.error("Error updating booking:", error);
+        res.status(500).send({ message: 'Internal Server Error.' });
+    }
+  });
 
 
 export default router

@@ -6,18 +6,29 @@ const bookingSchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
+    userName: {
+        type: String,
+        required: true
+    },
     carerId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Carer',
+        required: true
+    },
+    carerName: {
+        type: String,
         required: true
     },
     petIds: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Pet'
     }], //allow multiple pets
+    petNames: [{
+        type: String
+    }],
     status: {
         type: String,
-        enum: ['Pending', 'Approved', 'Declined'],
+        enum: ['Pending', 'Approved', 'Denied'],
         default: 'Pending'
     },
     startDate: {
