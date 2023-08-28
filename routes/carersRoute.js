@@ -3,6 +3,7 @@ import {verifyToken} from '../utils/verifyToken.js';
 import { CarerModel } from '../models/Carer.js';
 import { CarerProfileModel } from '../models/CarerProfile.js';
 import { carerProfileUpload } from '../utils/uploadConfig.js';
+import { BookingModel } from '../models/Booking.js';
 
 const router = express.Router();
 
@@ -130,6 +131,18 @@ router.get('/carer/:id', async (req, res) => {
         res.status(500).send('Server Error');
     }
 });
+
+router.get('/bookings', async (req, res) => {
+    try {
+      const carerId = req.query.carerId;
+      const bookings = await BookingModel.find({ carerId: carerId });
+      res.json(bookings);
+    } catch (error) {
+      console.error('Error fetching bookings for carer:', error);
+      res.status(500).send('Server Error');
+    }
+});
+
 
 export default router
 
