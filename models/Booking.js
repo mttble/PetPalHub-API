@@ -20,11 +20,19 @@ const bookingSchema = new mongoose.Schema({
         enum: ['Pending', 'Approved', 'Declined'],
         default: 'Pending'
     },
-    pickUpDateTime: {
+    startDate: {
         type: String,
         required: true
     },
-    dropOffDateTime: {
+    endDate: {
+        type: String,
+        required: true
+    },
+    pickUpTime: {
+        type: String,
+        required: true
+    },
+    dropOffTime: {
         type: String,
         required: true
     },

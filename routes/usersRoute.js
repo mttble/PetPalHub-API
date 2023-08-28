@@ -39,15 +39,17 @@ router.get('/context',verifyToken, async (req, res, next) => {
 
 router.post('/booking', verifyToken, async (req, res) => {
     try {
-        const { petIds, pickUpDateTime, dropOffDateTime, carerId, message } = req.body;
+        const { petIds, startDate, endDate, pickUpTime, dropOffTime, carerId, message } = req.body;
         const userId = req.user.id;
 
         const booking = new BookingModel({
             carerId,
             userId,
             petIds,
-            pickUpDateTime,
-            dropOffDateTime,
+            startDate,
+            endDate,
+            pickUpTime,
+            dropOffTime,
             message
         });
 
