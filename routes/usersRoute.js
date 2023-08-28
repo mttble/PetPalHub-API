@@ -1,11 +1,11 @@
 import express from 'express';
-import {verifyToken} from '../utils/verifyToken.js';
 import { getProfile } from '../controllers/auth.js';
-import { UserModel } from '../models/User.js';
-import { PetModel } from '../models/Pet.js';
-import { sendEmail } from '../utils/email.js'
 import { BookingModel } from '../models/Booking.js';
 import { CarerModel } from '../models/Carer.js';
+import { PetModel } from '../models/Pet.js';
+import { UserModel } from '../models/User.js';
+import { sendEmail } from '../utils/email.js';
+import { verifyToken } from '../utils/verifyToken.js';
 
 
 
@@ -59,13 +59,12 @@ router.post('/booking', verifyToken, async (req, res) => {
         const carer = await CarerModel.findById(carerId);
         
         if (carer) {
-              await sendEmail(
-                  carer.email, 
-                  'New Booking Request', 
-                  `Hello ${carer.firstName}, you have a new booking request from ${req.user.firstName}.`
-              );
+            await sendEmail(
+                carer.email,
+                'New Booking Request',
+                `Hello ${carer.firstName}, you have a new booking request from ${req.user.firstName}.`
+            );
         }
-
         res.status(201).send(booking);
 
     } catch (error) {
