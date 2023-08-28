@@ -3,6 +3,12 @@ import {verifyToken} from '../utils/verifyToken.js';
 import { getProfile } from '../controllers/auth.js';
 import { UserModel } from '../models/User.js';
 import { PetModel } from '../models/Pet.js';
+import { sendEmail } from '../utils/email.js'
+import { BookingModel } from '../models/Booking.js';
+import { CarerModel } from '../models/Carer.js';
+
+
+
 
 const router = express.Router();
 
@@ -28,6 +34,43 @@ router.get('/context',verifyToken, async (req, res, next) => {
         console.error('Error fetching user context:', err);
         res.status(500).send('Server Error');
     }
+})
+
+
+router.post('/booking', verifyToken, async (req, res) => {
+    try {
+        const { petIds, pickUpDateTime, dropOffDateTime, carerId, message } = req.body;
+        const userId = req.user.id;
+
+        const booking = new BookingModel({
+            carerId,
+            userId,
+            petIds,
+            pickUpDateTime,
+            dropOffDateTime,
+            message
+        });
+
+        await booking.save();
+
+        // Fetch the carer's email to send the notification
+        const carer = await CarerModel.findById(carerId);
+        
+        if (carer) {
+              await sendEmail(
+                  carer.email, 
+                  'New Booking Request', 
+                  `Hello ${carer.firstName}, you have a new booking request from ${req.user.firstName}.`
+              );
+        }
+
+        res.status(201).send(booking);
+
+    } catch (error) {
+        console.error('Error when processing booking:', error);
+        res.status(500).send(error.message);
+    }
+
 })
 
 

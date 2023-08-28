@@ -5,11 +5,8 @@ import jwt from "jsonwebtoken"
 import carersRoutes from './routes/carersRoute.js'
 import usersRoutes from './routes/usersRoute.js'
 import petsRoutes from './routes/petsRoute.js'
-import multer from 'multer';
-import { login, register } from './controllers/auth.js'
-import { booking } from './controllers/user.js'
-import { verifyToken } from './utils/verifyToken.js'
 
+import { login, register } from './controllers/auth.js'
 
 
 
@@ -39,7 +36,7 @@ app.use('/uploads', express.static('uploads'));
 app.post('/register', register)
 app.post('/login', login,)
 
-app.post('/booking', verifyToken, booking)
+
 app.use('/carer-profiles', carersRoutes);
 
 
