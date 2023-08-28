@@ -144,5 +144,30 @@ router.get('/bookings', async (req, res) => {
 });
 
 
+router.put('/booking/updateStatus', async (req, res) => {
+    const { bookingId, status } = req.body;
+  
+    // Validate input
+    if (!bookingId || !['Approved', 'Denied'].includes(status)) {
+      return res.status(400).send({ message: 'Invalid input.' });
+    }
+  
+    try {
+      const booking = await BookingModel.findById(bookingId);
+      if (!booking) {
+        return res.status(404).send({ message: 'Booking not found.' });
+      }
+  
+      booking.status = status;
+      await booking.save();
+      console.log(`Booking ID: ${bookingId} status updated to ${status}`); 
+      res.status(200).send({ message: 'Booking status updated successfully.' });
+    } catch (error) {
+        console.error("Error updating booking:", error);
+        res.status(500).send({ message: 'Internal Server Error.' });
+    }
+  });
+
+
 export default router
 
