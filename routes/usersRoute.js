@@ -74,7 +74,27 @@ router.post('/booking', verifyToken, async (req, res) => {
 
 })
 
+router.get('/bookings', async (req, res) => {
+    try {
+      const userId = req.query.userId;
+      const bookings = await BookingModel.find({ userId: userId });
+      res.json(bookings);
+    } catch (error) {
+      console.error('Error fetching bookings:', error);
+      res.status(500).send('Server Error');
+    }
+  });
+  
 
+router.delete('/booking/:id', async (req, res) => {
+    try {
+        await BookingModel.findByIdAndDelete(req.params.id);
+        res.status(200).send('Booking deleted successfully');
+    } catch (error) {
+        console.error('Error deleting booking:', error);
+        res.status(500).send('Server Error');
+    }
+});
 
 export default router
 
