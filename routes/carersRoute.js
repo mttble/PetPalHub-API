@@ -117,5 +117,19 @@ router.get('/carer-profiles', async (req, res) => {
 });
 
 
+router.get('/carer/:id', async (req, res) => {
+    try {
+        const carer = await CarerModel.findById(req.params.id);
+        if (carer) {
+            res.json(carer);
+        } else {
+            res.status(404).send('Carer not found');
+        }
+    } catch (error) {
+        console.error('Error fetching carer:', error);
+        res.status(500).send('Server Error');
+    }
+});
+
 export default router
 
