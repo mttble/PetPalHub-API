@@ -9,6 +9,10 @@ const carerProfileSchema = new mongoose.Schema({
         type: String,
         trim: true,
     },
+    carerEmail: {
+        type: String,
+        trim: true,
+    },
     petType: {
         type: [String],
         trim: true,
