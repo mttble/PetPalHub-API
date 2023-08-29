@@ -8,7 +8,6 @@ export const checkExistingEmail = async (email, UserModel, CarerModel) => {
   if (existingUser || existingCarer) {
       return true
   }
-
   return false
 }
 
@@ -23,7 +22,6 @@ export const validateAndHashPassword = async (password) => {
   const salt = await bcrypt.genSalt(10);
   return await bcrypt.hash(password, salt);
 };
-
 
 
 export const validateDateOfBirth = (dateString) => {
