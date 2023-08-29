@@ -132,16 +132,19 @@ router.get('/carer/:id', async (req, res) => {
     }
 });
 
-router.get('/bookings', async (req, res) => {
+
+router.get('/confirmedBookings', async (req, res) => {
+    const { carerId } = req.query; 
+
     try {
-      const carerId = req.query.carerId;
-      const bookings = await BookingModel.find({ carerId: carerId });
-      res.json(bookings);
+        // Fetch bookings where status is 'approved' and userId matches
+        const bookings = await BookingModel.find({ carerId, status: 'Approved' });
+        res.status(200).json(bookings);
     } catch (error) {
-      console.error('Error fetching bookings for carer:', error);
-      res.status(500).send('Server Error');
+        res.status(500).json({ message: "Internal server error." });
     }
 });
+
 
 
 router.put('/booking/updateStatus', async (req, res) => {
