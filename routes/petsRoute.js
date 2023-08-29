@@ -35,9 +35,11 @@ router.get('/pet-profiles', async (req, res) => {
   }
 });
 
+
 router.get('/pet-profiles/:id', async (req, res) => {
     try {
       const { id } = req.params; // Retrieve the id from request parameters
+      console.log(id);
       const petProfile = await PetModel.findById(id); // Fetch pet profile by its id
       if (petProfile) {
           res.json(petProfile);
@@ -61,5 +63,20 @@ router.delete('/:petId', verifyToken, async (req, res) => {
   }
 });
 
+
+router.get('/view/:petId', async (req, res) => {
+  try {
+      const { petId } = req.params;
+      const petProfile = await PetModel.findById(petId);
+      if (petProfile) {
+          res.json(petProfile);
+      } else {
+          res.status(404).send('Pet profile not found');
+      }
+  } catch (error) {
+      console.error('Error fetching pet profile:', error);
+      res.status(500).send('Server Error');
+  }
+});
 
 export default router
