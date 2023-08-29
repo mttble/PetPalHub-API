@@ -8,8 +8,6 @@ import { sendEmail } from '../utils/email.js';
 import { verifyToken } from '../utils/verifyToken.js';
 
 
-
-
 const router = express.Router();
 
 router.get('/profile', getProfile)
@@ -23,7 +21,7 @@ router.get('/context',verifyToken, async (req, res, next) => {
         const user = await UserModel.findById(userId).select('-password'); // Excluding the password for security reasons
 
         // Fetch user's pets
-        const pets = await PetModel.find({ ownerId: userId });
+        const pets = await PetModel.find({ ownerId: userId })
 
         // Combine and send the data
         res.json({
@@ -31,15 +29,15 @@ router.get('/context',verifyToken, async (req, res, next) => {
             pets
         });
     } catch (err) {
-        console.error('Error fetching user context:', err);
-        res.status(500).send('Server Error');
+        console.error('Error fetching user context:', err)
+        res.status(500).send('Server Error')
     }
 })
 
 
 router.post('/booking', verifyToken, async (req, res) => {
     try {
-        const { petIds, startDate, endDate, pickUpTime, dropOffTime, carerId, status, message, carerName, petNames, userName } = req.body;
+        const { petIds, startDate, endDate, pickUpTime, dropOffTime, carerId, status, message, carerName, petNames, userName, userEmail, carerEmail } = req.body;
         const userId = req.user.id;
 
         const booking = new BookingModel({
@@ -54,10 +52,12 @@ router.post('/booking', verifyToken, async (req, res) => {
             pickUpTime,
             dropOffTime,
             message,
-            status
+            status,
+            userEmail,
+            carerEmail,
         });
 
-        await booking.save();
+        await booking.save()
 
         // Fetch the carer's email to send the notification
         const carer = await CarerModel.findById(carerId);
@@ -69,18 +69,18 @@ router.post('/booking', verifyToken, async (req, res) => {
                 `Hello ${carer.firstName}, you have a new booking request from ${req.user.firstName}.`
             );
         }
-        res.status(201).send(booking);
+        res.status(201).send(booking)
 
     } catch (error) {
-        console.error('Error when processing booking:', error);
-        res.status(500).send(error.message);
+        console.error('Error when processing booking:', error)
+        res.status(500).send(error.message)
     }
 
 })
 
 
 router.get('/petPalRequests', async (req, res) => {
-    const { userId, carerId } = req.query; 
+    const { userId, carerId } = req.query
 
     try {
         let query = { status: { $in: ['Pending', 'Denied'] } };
@@ -98,28 +98,26 @@ router.get('/petPalRequests', async (req, res) => {
     }
 });
 
-  
 
 router.get('/confirmedBookings', async (req, res) => {
-    const { userId } = req.query; 
+    const { userId } = req.query
 
     try {
         // Fetch bookings where status is 'approved' and userId matches
-        const bookings = await BookingModel.find({ userId, status: 'Approved' });
+        const bookings = await BookingModel.find({ userId, status: 'Approved' })
         res.status(200).json(bookings);
     } catch (error) {
-        res.status(500).json({ message: "Internal server error." });
+        res.status(500).json({ message: "Internal server error." })
     }
 });
 
 
-
 router.delete('/booking/:id', async (req, res) => {
     try {
-        await BookingModel.findByIdAndDelete(req.params.id);
-        res.status(200).send('Booking deleted successfully');
+        await BookingModel.findByIdAndDelete(req.params.id)
+        res.status(200).send('Booking deleted successfully')
     } catch (error) {
-        console.error('Error deleting booking:', error);
+        console.error('Error deleting booking:', error)
         res.status(500).send('Server Error');
     }
 });

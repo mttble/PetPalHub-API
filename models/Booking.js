@@ -10,6 +10,10 @@ const bookingSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    userEmail: {
+        type: String,
+        required: true
+    },
     carerId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Carer',
@@ -18,6 +22,9 @@ const bookingSchema = new mongoose.Schema({
     carerName: {
         type: String,
         required: true
+    },
+    carerEmail: {
+        type: String,
     },
     petIds: [{
         type: mongoose.Schema.Types.ObjectId,
