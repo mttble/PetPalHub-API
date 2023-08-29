@@ -4,9 +4,33 @@ import { CarerModel } from '../models/Carer.js';
 import { CarerProfileModel } from '../models/CarerProfile.js';
 import { carerProfileUpload } from '../utils/uploadConfig.js';
 import { BookingModel } from '../models/Booking.js';
+import { handleError } from '../utils/errorHandler.js';
 
 const router = express.Router();
 
+const updateOrCreateProfile = async (req, existingProfile, profileData) => {
+    if (existingProfile) {
+      Object.assign(existingProfile, profileData);
+    } else {
+      existingProfile = new CarerProfileModel(profileData);
+    }
+    if (req.file) {
+      existingProfile.profileImage = `/uploads/carer_profile_image/${req.file.filename}`;
+    }
+    await existingProfile.save();
+  };
+
+router.post('/profile', verifyToken, carerProfileUpload.single('avatar'), async (req, res) => {
+    try {
+      const profileData = req.body;
+      const existingProfile = await CarerProfileModel.findOne({ userId: profileData.userId });
+  
+      await updateOrCreateProfile(req, existingProfile, profileData);
+  
+      res.status(201).send({ message: existingProfile ? 'Profile updated successfully!' : 'Profile created successfully!' });
+    } catch (error) {
+        handleError(res, error, 'Failed to create profile.');}
+  });
 
 router.get('/context',verifyToken, async (req, res, next) => {
     try {
@@ -19,55 +43,10 @@ router.get('/context',verifyToken, async (req, res, next) => {
         res.json({
             user
         });
-
-    } catch (err) {
-        console.error('Error fetching user context:', err);
-        res.status(500).send('Server Error');
-    }
-})
-
-// creates profile is one doesn't exist or updates with new data if it does
-router.post('/profile', verifyToken, carerProfileUpload.single('avatar'), async (req, res) => {
-    try {
-        const userId = req.body.userId;
-        const profileData = req.body;
-
-        // Check if a profile with the given user ID exists
-        const existingProfile = await CarerProfileModel.findOne({ userId });
-
-        if (existingProfile) {
-            // Profile exists, update it with the new data
-            existingProfile.companyFullName = profileData.companyFullName;
-            existingProfile.location = profileData.location;
-            existingProfile.aboutMe = profileData.aboutMe;
-            existingProfile.experience = profileData.experience; // Fix this line
-            existingProfile.petType = profileData.petType; // Fix this line
-            existingProfile.additionalServices = profileData.additionalServices; // Fix this line
-
-            // Update profile image if a new avatar is provided
-            if (req.file) {
-                existingProfile.profileImage = `/uploads/carer_profile_image/${req.file.filename}`;
-            }
-
-            // Save the updated profile
-            await existingProfile.save();
-
-            res.status(201).send({ message: 'Profile updated successfully!' });
-        } else {
-            // Profile doesn't exist, create a new profile
-            if (req.file) {
-                profileData.profileImage = `/uploads/carer_profile_image/${req.file.filename}`;
-            }
-            const newCarerProfile = new CarerProfileModel(profileData);
-            await newCarerProfile.save();
-            res.status(201).send({ message: 'Profile created successfully!' });
-        }
     } catch (error) {
-        console.error("Error while creating/updating profile:", error);
-        res.status(500).send({ message: 'Failed to create/update profile.', error: error.message });
+        handleError(res, error, 'Error fetching user context:');}
     }
-});
-
+)
 
 router.get('/profile', async (req, res) => {
     const userId = req.query.userId; // Retrieve user ID from the query parameter
@@ -83,26 +62,19 @@ router.get('/profile', async (req, res) => {
 
         res.status(200).send(profileData);
     } catch (error) {
-        console.error("Error while fetching profile:", error);
-        res.status(500).send({ message: 'Failed to fetch profile data.', error: error.message });
+        handleError(res, error, "Error while fetching profile:")
     }
 });
 
-
-
 router.delete('/profile', verifyToken, async (req, res) => {
     try {
-        const userId = req.query.userId; // Retrieve user ID from the query parameter
-        
-        // Find and delete the carer profile based on the user ID
+        const userId = req.query.userId; 
+
         await CarerProfileModel.findOneAndDelete({ userId: userId });
         
-        // Optionally, you can also delete the user's associated data in other models, if needed
-    
         res.status(200).send({ message: 'Profile deleted successfully!' });
     } catch (error) {
-        console.error('Error deleting profile:', error);
-        res.status(500).send({ message: 'Failed to delete profile.', error: error.message });
+        handleError(res, error, 'Error deleting profile:')
     }
     });
 
@@ -112,11 +84,9 @@ router.get('/carer-profiles', async (req, res) => {
         const carerProfiles = await CarerProfileModel.find();
         res.json(carerProfiles);
     } catch (error) {
-        console.error('Error fetching carer profiles:', error);
-        res.status(500).send('Server Error');
+        handleError(res, error, 'Error fetching carer profiles:')
     }
 });
-
 
 router.get('/carer/:id', async (req, res) => {
     try {
@@ -127,11 +97,9 @@ router.get('/carer/:id', async (req, res) => {
             res.status(404).send('Carer not found');
         }
     } catch (error) {
-        console.error('Error fetching carer:', error);
-        res.status(500).send('Server Error');
+        handleError(res, error, 'Error fetching carer profiles:')
     }
 });
-
 
 router.get('/confirmedBookings', async (req, res) => {
     const { carerId } = req.query; 
@@ -141,36 +109,29 @@ router.get('/confirmedBookings', async (req, res) => {
         const bookings = await BookingModel.find({ carerId, status: 'Approved' });
         res.status(200).json(bookings);
     } catch (error) {
-        res.status(500).json({ message: "Internal server error." });
+        handleError(res, error, 'Error fetching carer confirmed bookings:')
     }
 });
-
-
 
 router.put('/booking/updateStatus', async (req, res) => {
     const { bookingId, status } = req.body;
   
-    // Validate input
     if (!bookingId || !['Approved', 'Denied'].includes(status)) {
       return res.status(400).send({ message: 'Invalid input.' });
     }
-  
     try {
       const booking = await BookingModel.findById(bookingId);
       if (!booking) {
         return res.status(404).send({ message: 'Booking not found.' });
       }
-  
       booking.status = status;
       await booking.save();
       console.log(`Booking ID: ${bookingId} status updated to ${status}`); 
       res.status(200).send({ message: 'Booking status updated successfully.' });
     } catch (error) {
-        console.error("Error updating booking:", error);
-        res.status(500).send({ message: 'Internal Server Error.' });
+        handleError(res, error, 'Error updating booking:')
     }
   });
-
 
 export default router
 
