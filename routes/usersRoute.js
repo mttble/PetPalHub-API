@@ -39,7 +39,7 @@ router.get('/context',verifyToken, async (req, res, next) => {
 
 router.post('/booking', verifyToken, async (req, res) => {
     try {
-        const { petIds, startDate, endDate, pickUpTime, dropOffTime, carerId, message, carerName, petNames, userName } = req.body;
+        const { petIds, startDate, endDate, pickUpTime, dropOffTime, carerId, status, message, carerName, petNames, userName } = req.body;
         const userId = req.user.id;
 
         const booking = new BookingModel({
@@ -53,7 +53,8 @@ router.post('/booking', verifyToken, async (req, res) => {
             endDate,
             pickUpTime,
             dropOffTime,
-            message
+            message,
+            status
         });
 
         await booking.save();
@@ -77,17 +78,41 @@ router.post('/booking', verifyToken, async (req, res) => {
 
 })
 
-router.get('/bookings', async (req, res) => {
+
+router.get('/petPalRequests', async (req, res) => {
+    const { userId, carerId } = req.query; 
+
     try {
-      const userId = req.query.userId;
-      const bookings = await BookingModel.find({ userId: userId });
-      res.json(bookings);
+        let query = { status: { $in: ['Pending', 'Denied'] } };
+
+        if (userId) {
+            query.userId = userId;
+        } else if (carerId) {
+            query.carerId = carerId;
+        }
+
+        const bookings = await BookingModel.find(query);
+        res.status(200).json(bookings);
     } catch (error) {
-      console.error('Error fetching bookings:', error);
-      res.status(500).send('Server Error');
+        res.status(500).json({ message: "Internal server error." });
     }
-  });
+});
+
   
+
+router.get('/confirmedBookings', async (req, res) => {
+    const { userId } = req.query; 
+
+    try {
+        // Fetch bookings where status is 'approved' and userId matches
+        const bookings = await BookingModel.find({ userId, status: 'Approved' });
+        res.status(200).json(bookings);
+    } catch (error) {
+        res.status(500).json({ message: "Internal server error." });
+    }
+});
+
+
 
 router.delete('/booking/:id', async (req, res) => {
     try {
