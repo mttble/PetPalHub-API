@@ -4,8 +4,6 @@ import { petUpload } from '../utils/uploadConfig.js';
 import { PetModel } from '../models/Pet.js';
 import { handleError } from '../utils/errorHandler.js';
 
-
-
 const router = express.Router();
 
 // allows user to create a pet profile
@@ -16,8 +14,9 @@ router.post('/profile', verifyToken, petUpload.single('petImage'), async (req, r
           profileData.petImage = `/uploads/pet_image/${req.file.filename}`
       }
       const newPetProfile = new PetModel(profileData);
-      await newPetProfile.save();
-      res.status(201).send({ message: 'Profile created successfully!' })
+      const savedPetProfile = await newPetProfile.save();
+
+      res.status(200).send({ message: 'Profile created successfully!', petId: savedPetProfile._id })
   } catch (error) {
       handleError(res, error, 'Failed to create profile.')
   }
@@ -33,7 +32,6 @@ router.get('/pet-profiles', async (req, res) => {
     handleError(res, error, 'Error fetching pet profiles:')
   }
 });
-
 
 
 router.delete('/:petId', verifyToken, async (req, res) => {
@@ -57,7 +55,7 @@ router.get('/view/:petId', async (req, res) => {
           res.status(404).send('Pet profile not found')
       }
   } catch (error) {
-    handleError(res, error, 'Failed to fetch pet profile.')
+    handleError(res, error, 'Failed to  profile.')
   }
 });
 
