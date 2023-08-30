@@ -20,7 +20,6 @@ afterAll(async () => {
     await new Promise(resolve => server.close(resolve));
   });
   
-
 describe('Auth API', () => {
   it('Should register a new user', async () => {
     const response = await request(server)
@@ -33,9 +32,7 @@ describe('Auth API', () => {
         dateOfBirth: '01/01/1990',
         role: 'user'
       });
-      
     user = response.body.register;
-
     expect(response.status).toBe(200);
     expect(user.email).toBe('john.doe@example.com');
   });
@@ -49,7 +46,7 @@ describe('Auth API', () => {
       });
 
     userToken = response.header['set-cookie'][0].split(';')[0].split('=')[1];
-
+    
     expect(response.status).toBe(200);
     expect(userToken).toBeDefined();
   });
