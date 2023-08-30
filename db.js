@@ -1,3 +1,4 @@
+import { ATLAS_DB_URL } from './config.js'
 import mongoose from 'mongoose'
 
 async function dbClose() {
@@ -8,9 +9,9 @@ async function dbClose() {
 
 const dbConnection = async () => {
     try {
-        await mongoose.connect(process.env.ATLAS_DB_URL, { useNewUrlParser: true, useUnifiedTopology: true });
+        await mongoose.connect(ATLAS_DB_URL, { useNewUrlParser: true, useUnifiedTopology: true });
         
-        console.log('Mongoose connected to', process.env.ATLAS_DB_URL);
+        console.log('Mongoose connected to', ATLAS_DB_URL);
 
         mongoose.connection.on('error', (err) => {
             console.error('Mongoose connection error:', err);

@@ -1,23 +1,21 @@
-import {UserModel} from "../models/User.js"
-import {CarerModel} from "../models/Carer.js"
-import bcrypt from "bcrypt"
-import jwt from "jsonwebtoken"
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 import moment from 'moment';
-import { checkExistingEmail, validateAndHashPassword, validateDateOfBirth } from '../utils/validation.js'
+import { CarerModel } from "../models/Carer.js";
+import { UserModel } from "../models/User.js";
+import { checkExistingEmail, validateAndHashPassword, validateDateOfBirth } from '../utils/validation.js';
+import { JWT_SECRET } from '../config.js'
 
-export const test = async (req, res, next) => {
-    res.json('test is working')
-}
 
 export const register = async (req, res, next) => {
-    const Model = req.body.role === 'user' ? UserModel : CarerModel;
-    const roleMessage = req.body.role === 'user' ? 'User' : 'Carer';
-    
     try {
-        const emailExists = await checkExistingEmail(req.body.email, Model);
+        const emailExists = await checkExistingEmail(req.body.email, UserModel, CarerModel);
+        
         if (emailExists) {
-            return res.json({error: `Email already exists as ${roleMessage}`});
+            return res.json({ error: 'Email already exists' });
         }
+
+        const Model = req.body.role === 'user' ? UserModel : CarerModel;
 
         const hashedPassword = await validateAndHashPassword(req.body.password);
         validateDateOfBirth(req.body.dateOfBirth);
@@ -36,11 +34,11 @@ export const register = async (req, res, next) => {
             dateOfBirth: parsedDate,
             profileImage: req.body.profileImage,
             address: {
-                street: req.body.address?.street,
-                city: req.body.address?.city,
-                state: req.body.address?.state,
-                postalCode: req.body.address?.postalCode,
-                country: req.body.address?.country
+                street: req.body.street,
+                city: req.body.city,
+                state: req.body.state,
+                postalCode: req.body.postalCode,
+                country: req.body.country
             },
             phoneNumber: req.body.phoneNumber,
             bio: req.body.bio,
@@ -56,80 +54,134 @@ export const register = async (req, res, next) => {
         }
         delete registerObject.password;
 
-        res.status(201).json({ message: `${roleMessage} registered successfully!`, register: registerObject });
+        res.status(201).json({ message: 'registered successfully!', register: registerObject });
 
     } catch (error) {
         console.error("Error:", error);
-        res.status(500).json({ message: `Error registering the ${roleMessage}`, error: error.message });
+        res.status(500).json({ message: 'Error registering', error: error.message });
     }
 }
 
 
-// export const login = async (req, res, next) => {
-//     try {
-//         const user = await UserModel.findOne({email:req.body.email})
-//         if(!user)
-//             return res.json({
-//                 error: "User not found"
-//         })
+export const changeDetails = async (req, res, next) => {
+    try {
+        const userId = req.params.userId; // Extract userId from route parameter
+        const userRole = req.params.userRole; // Extract userRole from route parameter
 
-//         const isPasswordCorrect = await bcrypt.compare(req.body.password, user.password)
-//         if(!isPasswordCorrect)
-//             return res.json({
-//                 error: "Password is incorrect"
-//             })
-//         if (isPasswordCorrect) {
-//             res.json('Passwords match')
-//         }
+        const Model = userRole === 'user' ? UserModel : CarerModel
 
+        const existingUser = await Model.findById(userId); // Fetch the existing user
 
-//         const {password, isAdmin, ...otherDetails} = user._doc
+        if (!existingUser) {
+            return res.json({ error: 'User not found' })
+        }
+        const tokenName = userRole === 'user' ? 'userToken' : 'carerToken';
+        const token = req.cookies[tokenName]
+        if (!token) {
+            return res.json({ error: 'Unauthorized' });
+        }
+        try {
+            jwt.verify(token, JWT_SECRET)
+        } catch (error) {
+            return res.json({ error: 'Unauthorized' });
+        }
+        const emailExists = await checkExistingEmail(req.body.email, UserModel, CarerModel)
+        if (emailExists) {
+            return res.json({ error: 'Email already exists' })
+        }
 
-//         const token = jwt.sign({id:user._id, role:req.body.role}, process.env.JWT_SECRET, {}, (err, token) => {
-//         if(err) throw err;
-//         res.cookie("access_token", token,{httpOnly: true,}).status(200).json({...otherDetails})
-//         })
-//     }catch(err){
-//         next(err);
-//     }
-// }
+        existingUser.email = req.body.email || existingUser.email
+        existingUser.phoneNumber = req.body.phoneNumber || existingUser.phoneNumber
+
+        if (req.body.password) {
+            // Hash the new password before saving
+            const hashedPassword = await bcrypt.hash(req.body.password, 10)
+            existingUser.password = hashedPassword;
+        }
+        
+        existingUser.address.country = req.body.country || existingUser.address.country;
+        existingUser.address.state = req.body.state || existingUser.address.state;
+        existingUser.address.city = req.body.city || existingUser.address.city;
+        existingUser.address.street = req.body.street || existingUser.address.street;
+        existingUser.address.postalCode = req.body.postalCode || existingUser.address.postalCode
+
+        const updatedUser = await existingUser.save();
+
+        res.status(200).json({ message: 'User details updated successfully!', user: updatedUser });
+    } catch (error) {
+        console.error("Error:", error);
+        res.status(500).json({ message: 'Error updating user details', error: error.message });
+    }
+}
 
 
 export const login = async (req, res, next) => {
     try {
-        // Determine which model to use based on the role provided
-        let model;
-        if (req.body.role === 'user') {
+        const { email, password } = req.body;
+
+        // Find the user by email in the users collection
+        const user = await UserModel.findOne({ email });
+        // Find the carer by email in the carers collection
+        const carer = await CarerModel.findOne({ email });
+
+        // Check if the provided email exists in either users or carers collection
+        if (!user && !carer) {
+            return res.status(404).json({ error: "User not found" })
+        }
+
+        // Determine which model to use based on the found user or carer
+        let model, role, tokenName;
+        if (user) {
             model = UserModel;
-        } else if (req.body.role === 'carer') {
+            role = 'user'
+            tokenName = "userToken"
+        } else if (carer) {
             model = CarerModel;
-        } else {
-            return res.status(400).json({ error: "Invalid role specified" });
+            role = 'carer'
+            tokenName = "carerToken"
         }
 
-        const user = await model.findOne({ email: req.body.email });
-        if (!user) {
-            return res.status(404).json({ error: "User not found" });
-        }
-
-        const isPasswordCorrect = await bcrypt.compare(req.body.password, user.password);
+        // Check if the provided password matches the stored hash
+        const foundUser = user || carer;
+        const isPasswordCorrect = await bcrypt.compare(password, foundUser.password);
         if (!isPasswordCorrect) {
-            return res.status(401).json({ error: "Password is incorrect" });
-        }
+            return res.status(404).json({ error: "Password is incorrect" });
+        } else if (isPasswordCorrect) {
+            // Destructuring the user details and excluding password and any other sensitive information
+            const { password: userPassword, ...otherDetails } = foundUser._doc;
 
-        // Destructuring the user details and excluding password and any other sensitive information
-        const { password, ...otherDetails } = user._doc;
-
-        const token = jwt.sign({ id: user._id, role: req.body.role }, process.env.JWT_SECRET, {}, (err, token) => {
-            if (err) {
-                console.error("Error generating JWT token:", err);
-                return res.status(500).json({ error: "Error generating authentication token" });
+        // Create and send an authentication token
+            const token = jwt.sign({ id: foundUser._id, firstName: foundUser.firstName, role: foundUser.role, email: foundUser.email }, JWT_SECRET, {}, (err, token) => {
+                const userObject = foundUser.toObject();
+                const { password, ...userWithoutPassword } = userObject;
+                res.cookie(tokenName, token, {httpOnly: false, sameSite: 'none', secure: true}).json(userWithoutPassword);
+                });
             }
-            res.cookie("access_token", token, { httpOnly: true }).status(200).json({ ...otherDetails });
-        });
 
     } catch (err) {
         console.error("Error during login:", err);
         next(err);
     }
 }
+
+export const getProfile = (req, res) => {
+    const tokenName = req.baseUrl === '/users' ? 'userToken' : 'carerToken' // Adjust based on the route
+    const token = req.cookies[tokenName] // Get the token from the cookies
+
+    if (token) {
+        jwt.verify(token, process.env.JWT_SECRET, (err, decodedToken) => {
+            if (err) {
+                // Token verification failed
+                console.error("Error verifying token:", err);
+                res.status(401).json({ error: "Unauthorized" });
+            } else {
+                // Token verification succeeded, return the user's data
+                res.json(decodedToken);
+            }
+        });
+    } else {
+        // No token found in cookies
+        res.status(401).json({ error: "Unauthorized" });
+    }
+}
+
