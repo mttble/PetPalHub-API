@@ -17,8 +17,7 @@ const app = express()
 
 const corsOptions = {
     credentials: true,
-    // origin: 'http://localhost:5173'
-    origin: 'https://petpalhub-api.onrender.com'
+    origin: 'http://localhost:5173'
 }
 app.use(cookieParser())
 app.use(cors(corsOptions))
