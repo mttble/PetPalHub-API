@@ -73,9 +73,18 @@ export const changeDetails = async (req, res, next) => {
         const existingUser = await Model.findById(userId); // Fetch the existing user
 
         if (!existingUser) {
-            return res.status(404).json({ error: 'User not found' })
+            return res.json({ error: 'User not found' })
         }
-
+        const tokenName = userRole === 'user' ? 'userToken' : 'carerToken';
+        const token = req.cookies[tokenName]
+        if (!token) {
+            return res.json({ error: 'Unauthorized' });
+        }
+        try {
+            jwt.verify(token, JWT_SECRET)
+        } catch (error) {
+            return res.json({ error: 'Unauthorized' });
+        }
         const emailExists = await checkExistingEmail(req.body.email, UserModel, CarerModel)
         if (emailExists) {
             return res.json({ error: 'Email already exists' })
@@ -98,7 +107,7 @@ export const changeDetails = async (req, res, next) => {
 
         const updatedUser = await existingUser.save();
 
-        res.json({ message: 'User details updated successfully!', user: updatedUser });
+        res.status(200).json({ message: 'User details updated successfully!', user: updatedUser });
     } catch (error) {
         console.error("Error:", error);
         res.status(500).json({ message: 'Error updating user details', error: error.message });
