@@ -1,10 +1,10 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import moment from 'moment';
+import { JWT_SECRET } from '../config.js';
 import { CarerModel } from "../models/Carer.js";
 import { UserModel } from "../models/User.js";
 import { checkExistingEmail, validateAndHashPassword, validateDateOfBirth } from '../utils/validation.js';
-import { JWT_SECRET } from '../config.js'
 
 
 export const register = async (req, res, next) => {
