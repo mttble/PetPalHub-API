@@ -8,10 +8,13 @@ async function dbClose() {
 
 
 const dbConnection = async () => {
+    // Determine the correct database URL based on the environment
+    const dbURL = process.env.NODE_ENV === 'test' ? process.env.TEST_DB_URL : process.env.ATLAS_DB_URL;
+
     try {
-        await mongoose.connect(ATLAS_DB_URL, { useNewUrlParser: true, useUnifiedTopology: true });
+        await mongoose.connect(dbURL, { useNewUrlParser: true, useUnifiedTopology: true });
         
-        console.log('Mongoose connected to', ATLAS_DB_URL);
+        console.log('Mongoose connected to', dbURL);
 
         mongoose.connection.on('error', (err) => {
             console.error('Mongoose connection error:', err);
@@ -25,7 +28,8 @@ const dbConnection = async () => {
         // Exit the process with failure
         process.exit(1);
     }
-}
+};
+
 
 
 export { dbClose, dbConnection }

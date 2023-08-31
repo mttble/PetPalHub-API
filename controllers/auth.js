@@ -54,7 +54,7 @@ export const register = async (req, res, next) => {
         }
         delete registerObject.password;
 
-        res.status(201).json({ message: 'registered successfully!', register: registerObject });
+        res.status(200).json({ message: 'registered successfully!', register: registerObject });
 
     } catch (error) {
         console.error("Error:", error);
@@ -154,9 +154,8 @@ export const login = async (req, res, next) => {
             const token = jwt.sign({ id: foundUser._id, firstName: foundUser.firstName, role: foundUser.role, email: foundUser.email }, JWT_SECRET, {}, (err, token) => {
                 const userObject = foundUser.toObject();
                 const { password, ...userWithoutPassword } = userObject;
-                res.cookie(tokenName, token, {httpOnly: false, sameSite: 'none', secure: true}).json(userWithoutPassword);
-                });
-            }
+                res.cookie(tokenName, token, {httpOnly: false, sameSite: 'none', secure: true}).json({...userWithoutPassword, userId: foundUser._id});
+            })}
 
     } catch (err) {
         console.error("Error during login:", err);
