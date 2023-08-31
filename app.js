@@ -17,7 +17,7 @@ const app = express()
 
 const corsOptions = {
     credentials: true,
-    origin: 'http://localhost:5173'
+    origin: 'https://ephemeral-douhua-6fded5.netlify.app'
 }
 app.use(cookieParser())
 app.use(cors(corsOptions))
