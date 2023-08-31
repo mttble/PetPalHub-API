@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken"
 import carersRoutes from './routes/carersRoute.js'
 import usersRoutes from './routes/usersRoute.js'
 import petsRoutes from './routes/petsRoute.js'
-import { login, register } from './controllers/auth.js'
+import { login, register, changeDetails} from './controllers/auth.js'
 import { CarerModel } from './models/Carer.js'
 import { UserModel } from './models/User.js'
 import fs from 'fs';
@@ -32,12 +32,13 @@ app.use('/pet', petsRoutes)
 app.use('/uploads', express.static('uploads'));
 app.post('/register', register)
 app.post('/login', login,)
+app.put('/change-details/:userRole/:userId', changeDetails)
 
 // create two empty folder for uploaded files
 const createFolderIfNotExist = (folderPath) => {
-  if (!fs.existsSync(folderPath)){
+    if (!fs.existsSync(folderPath)){
     fs.mkdirSync(folderPath, { recursive: true });
-  }
+    }
 }
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
