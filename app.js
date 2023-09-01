@@ -12,7 +12,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import './config.js'; 
+import './config.js';
 import { dbConnection } from './db.js'
 
 dbConnection()

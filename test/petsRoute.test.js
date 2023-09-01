@@ -1,9 +1,9 @@
-import request from 'supertest';
-import app from '../app.js';
-import mongoose from 'mongoose';
-import { PetModel } from '../models/Pet.js'; 
+import request from 'supertest'
+import app from '../app.js'
+import mongoose from 'mongoose'
+import { PetModel } from '../models/Pet.js'
 import { UserModel } from '../models/User'
-import dotenv from 'dotenv';
+import dotenv from 'dotenv'
 
 dotenv.config();
 
@@ -36,7 +36,7 @@ describe('Pet Profile API', () => {
 
   it('Should register a new user', async () => {
     const response = await request(server)
-      .post('/register') 
+      .post('/register')
       .send({
         firstName: 'John1',
         lastName: 'Doe1',

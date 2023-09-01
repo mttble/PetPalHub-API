@@ -1,8 +1,8 @@
-import request from 'supertest';
-import app from '../app';  
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
-import { UserModel } from '../models/User';
+import request from 'supertest'
+import app from '../app'
+import mongoose from 'mongoose'
+import dotenv from 'dotenv'
+import { UserModel } from '../models/User'
 
 dotenv.config();
 
@@ -23,7 +23,7 @@ afterAll(async () => {
 describe('Auth API', () => {
   it('Should register a new user', async () => {
     const response = await request(server)
-      .post('/register') 
+      .post('/register')
       .send({
         firstName: 'John',
         lastName: 'Doe',
