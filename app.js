@@ -22,7 +22,13 @@ const corsOptions = {
 
 app.use(cors({
     credentials: true,
-    origin: 'https://petpalhub.netlify.app'
+    origin: 'https://petpalhub.netlify.app',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    allowedHeaders: [
+        'Access-Control-Allow-Origin',
+        'Content-Type',
+        'Authorization',
+    ]
 }))
 
 
