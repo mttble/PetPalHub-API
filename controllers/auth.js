@@ -159,9 +159,9 @@ export const login = async (req, res, next) => {
                     }
                 const userObject = foundUser.toObject();
                 const { password, ...userWithoutPassword } = userObject;
-                const token = await foundUser.generateToken(3600 * 5);
-                res.cookie(tokenName, token, {httpOnly: true, sameSite: 'none', secure: true, maxAge:3600000}).json(userWithoutPassword);
-                console.log(token)
+                const generatedToken = await foundUser.generateToken(3600 * 5);
+                res.cookie(tokenName, generatedToken, {httpOnly: true, sameSite: 'none', secure: true, maxAge:3600000}).json(userWithoutPassword);
+                console.log(generatedToken)
                 });
                 console.log('this fired')
             }
