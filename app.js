@@ -1,26 +1,25 @@
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import express from 'express'
+import fs from 'fs'
 import jwt from "jsonwebtoken"
-import carersRoutes from './routes/carersRoute.js'
-import usersRoutes from './routes/usersRoute.js'
-import petsRoutes from './routes/petsRoute.js'
-import { login, register, changeDetails} from './controllers/auth.js'
+import path, { dirname } from 'path'
+import { fileURLToPath } from 'url'
+import { changeDetails, login, register } from './controllers/auth.js'
 import { CarerModel } from './models/Carer.js'
 import { UserModel } from './models/User.js'
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import carersRoutes from './routes/carersRoute.js'
+import petsRoutes from './routes/petsRoute.js'
+import usersRoutes from './routes/usersRoute.js'
 
 const app = express()
 
 app.use(cors({
     credentials: true,
-    origin: 'https://petpalhub.netlify.app'
+    origin: 'https://petpalhub.au'
 }))
 const corsOptions = {
-    origin: 'https://petpalhub.netlify.app',
+    origin: 'https://petpalhub.au',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
 };
