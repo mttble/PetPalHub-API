@@ -14,19 +14,16 @@ import usersRoutes from './routes/usersRoute.js'
 
 const app = express()
 
-app.use(cors({
-    credentials: true,
-    origin: 'https://petpalhub.au'
-}))
-
 const corsOptions = {
     origin: 'https://petpalhub.au',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
 };
 
-app.use(cookieParser())
+
+
 app.use(cors(corsOptions))
+app.use(cookieParser())
 app.options('*', cors(corsOptions))
 app.use(express.json())
 app.use('/user', usersRoutes)
