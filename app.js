@@ -17,7 +17,7 @@ const app = express()
 
 const corsOptions = {
     credentials: true,
-    origin: 'https://petpalhub.netlify.app/'
+    origin: 'https://petpalhub.netlify.app'
 }
 app.use(cookieParser())
 app.use(cors(corsOptions))
