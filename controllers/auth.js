@@ -119,11 +119,12 @@ export const login = async (req, res, next) => {
     try {
         const { email, password } = req.body;
 
+
         const user = await UserModel.findOne({ email });
         const carer = await CarerModel.findOne({ email });
 
         if (!user && !carer) {
-            return res.status(404).json({ error: "User not found" });
+            return res.status(404).json({ error: "User not found" })
         }
 
         let model, role, tokenName;
@@ -144,12 +145,12 @@ export const login = async (req, res, next) => {
         } else if (isPasswordCorrect) {
             const { password: userPassword, ...otherDetails } = foundUser._doc;
 
-            // Create a token using async/await
-            const token = jwt.sign({ id: foundUser._id, firstName: foundUser.firstName, role: foundUser.role, email: foundUser.email }, JWT_SECRET, {});
-
-            // Set the token in a cookie with appropriate options
-            res.cookie(tokenName, token, { httpOnly: true, sameSite: 'none', secure: true }).json({ ...otherDetails, userId: foundUser._id });
-        }
+        // Create and send a cookie contaions authentication token
+            const token = jwt.sign({ id: foundUser._id, firstName: foundUser.firstName, role: foundUser.role, email: foundUser.email }, JWT_SECRET, {}, (err, token) => {
+                const userObject = foundUser.toObject();
+                const { password, ...userWithoutPassword } = userObject;
+                res.cookie(tokenName, token, {httpOnly: false, sameSite: 'none', secure: true}).json({...userWithoutPassword, userId: foundUser._id});
+            })}
 
     } catch (err) {
         console.error("Error during login:", err);
