@@ -15,10 +15,11 @@ import { dirname } from 'path';
 
 const app = express()
 
-const corsOptions = {
+app.use(cors({
     credentials: true,
     origin: 'https://petpalhub.netlify.app'
-}
+}))
+
 app.use(cookieParser())
 app.use(cors(corsOptions))
 app.use(express.json())
