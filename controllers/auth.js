@@ -149,7 +149,7 @@ export const login = async (req, res, next) => {
             const token = jwt.sign({ id: foundUser._id, firstName: foundUser.firstName, role: foundUser.role, email: foundUser.email }, JWT_SECRET, {}, (err, token) => {
                 const userObject = foundUser.toObject();
                 const { password, ...userWithoutPassword } = userObject;
-                res.cookie(tokenName, token, {httpOnly: true, sameSite: 'none', secure: true}).json({...userWithoutPassword, userId: foundUser._id});
+                res.cookie(tokenName, token, {httpOnly: true, sameSite: 'none', secure: true, path: '/', domain: 'petpalhub.netlify.app'}).json({...userWithoutPassword, userId: foundUser._id});
             })}
 
     } catch (err) {
