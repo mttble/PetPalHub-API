@@ -151,19 +151,20 @@ export const login = async (req, res, next) => {
             const { password: userPassword, ...otherDetails } = foundUser._doc;
 
         // Create and send an authentication token
-            jwt.sign({ id: foundUser._id, firstName: foundUser.firstName, role: foundUser.role, email: foundUser.email }, JWT_SECRET, {}, (err, token) => {
-                    if (err) {
-                        // Handle the error, if any
-                        console.error("Error signing the token:", err);
-                        return res.status(500).json({ error: "Token signing error" });
-                    }
-                const userObject = foundUser.toObject();
-                const { password, ...userWithoutPassword } = userObject;
-                res.cookie(tokenName, token, {httpOnly: true, sameSite: 'none', secure: true, maxAge:3600000}).json(userWithoutPassword);
-                console.log(token)
-                });
-                console.log('this fired')
+        jwt.sign({ id: foundUser._id, firstName: foundUser.firstName, role: foundUser.role, email: foundUser.email }, JWT_SECRET, {}, async (err, token) => {
+            if (err) {
+                // Handle the error, if any
+                console.error("Error signing the token:", err);
+                return res.status(500).json({ error: "Token signing error" });
             }
+            const userObject = foundUser.toObject();
+            const { password, ...userWithoutPassword } = userObject;
+            const generatedToken = await user.generateToken(3600 * 5);
+            res.cookie(tokenName, generatedToken, { httpOnly: true, sameSite: 'none', secure: true, maxAge: 3600000 }).json(userWithoutPassword);
+            console.log(generatedToken);
+        });
+            console.log('this fired')
+        }
 
     } catch (err) {
         console.error("Error during login:", err);
