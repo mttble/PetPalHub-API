@@ -19,6 +19,11 @@ app.use(cors({
     credentials: true,
     origin: 'https://petpalhub.netlify.app'
 }))
+const corsOptions = {
+    origin: 'https://petpalhub.netlify.app',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+};
 
 app.use(cookieParser())
 app.use(cors(corsOptions))
