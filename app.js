@@ -18,7 +18,7 @@ app.use(cors({
     credentials: true,
     origin: 'https://petpalhub.au'
 }))
-app.options('*', cors(corsOptions))
+
 const corsOptions = {
     origin: 'https://petpalhub.au',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
@@ -27,6 +27,7 @@ const corsOptions = {
 
 app.use(cookieParser())
 app.use(cors(corsOptions))
+app.options('*', cors(corsOptions))
 app.use(express.json())
 app.use('/user', usersRoutes)
 app.use('/carer', carersRoutes)
