@@ -147,30 +147,23 @@ export const login = async (req, res, next) => {
         if (!isPasswordCorrect) {
             return res.status(404).json({ error: "Password is incorrect" });
         } else if (isPasswordCorrect) {
-            // Destructuring the user details and excluding password and any other sensitive information
-            const { password: userPassword, ...otherDetails } = foundUser._doc;
-
-        // Create and send an authentication token
-            jwt.sign({ id: foundUser._id, firstName: foundUser.firstName, role: foundUser.role, email: foundUser.email }, JWT_SECRET, {}, async (err, token) => {
-                    if (err) {
-                        // Handle the errors
-                        console.error("Error signing the token:", err);
-                        return res.status(500).json({ error: "Token signing error" });
-                    }
-                const userObject = foundUser.toObject();
-                const { password, ...userWithoutPassword } = userObject;
-                const generatedToken = await foundUser.generateToken(3600 * 5);
-                res.cookie(tokenName, generatedToken, {httpOnly: true, sameSite: 'none', secure: true, maxAge:3600000}).json(userWithoutPassword);
-                console.log(generatedToken)
-                });
-                console.log('this fired')
-            }
-
-    } catch (err) {
-        console.error("Error during login:", err);
-        next(err);
-    }
-}
+            // Create and send an authentication token
+            const payload = {
+                id: foundUser._id,
+                firstName: foundUser.firstName,
+                role: foundUser.role,
+                email: foundUser.email,
+            };
+            const token = jwt.sign(payload, JWT_SECRET, {});
+            
+            // Set the token in a cookie
+            res.cookie(tokenName, token, { httpOnly: true, sameSite: 'none', secure: true, maxAge: 3600000 }).json({ message: "Login successful" });
+        }
+        } catch (err) {
+            console.error("Error during login:", err);
+            next(err);
+        }
+        };
 
 export const getProfile = (req, res) => {
     const tokenName = req.baseUrl === '/users' ? 'userToken' : 'carerToken' // Adjust based on the route
