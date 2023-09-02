@@ -154,8 +154,10 @@ export const login = async (req, res, next) => {
             const token = jwt.sign({ id: foundUser._id, firstName: foundUser.firstName, role: foundUser.role, email: foundUser.email }, JWT_SECRET, {}, (err, token) => {
                 const userObject = foundUser.toObject();
                 const { password, ...userWithoutPassword } = userObject;
-                res.cookie(tokenName, token, {httpOnly: false, sameSite: 'none', secure: true, maxAge:3600000}).json(userWithoutPassword);
+                res.cookie(tokenName, token, {httpOnly: true, sameSite: 'none', secure: true, maxAge:3600000}).json(userWithoutPassword);
                 });
+                console.log(token)
+                console.log('this fired')
             }
 
     } catch (err) {
