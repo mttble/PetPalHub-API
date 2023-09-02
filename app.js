@@ -11,13 +11,13 @@ import { UserModel } from './models/User.js'
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+import { dirname } from 'path';
 
 const app = express()
 
 const corsOptions = {
     credentials: true,
-    origin: 'https://ephemeral-douhua-6fded5.netlify.app'
+    origin: 'https://petpalhub.netlify.app/'
 }
 app.use(cookieParser())
 app.use(cors(corsOptions))
