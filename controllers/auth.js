@@ -119,17 +119,13 @@ export const login = async (req, res, next) => {
     try {
         const { email, password } = req.body;
 
-        // Find the user by email in the users collection
         const user = await UserModel.findOne({ email });
-        // Find the carer by email in the carers collection
         const carer = await CarerModel.findOne({ email });
 
-        // Check if the provided email exists in either users or carers collection
         if (!user && !carer) {
             return res.status(404).json({ error: "User not found" })
         }
 
-        // Determine which model to use based on the found user or carer
         let model, role, tokenName;
         if (user) {
             model = UserModel;
@@ -141,29 +137,25 @@ export const login = async (req, res, next) => {
             tokenName = "carerToken"
         }
 
-        // Check if the provided password matches the stored hash
         const foundUser = user || carer;
         const isPasswordCorrect = await bcrypt.compare(password, foundUser.password);
         if (!isPasswordCorrect) {
             return res.status(404).json({ error: "Password is incorrect" });
         } else if (isPasswordCorrect) {
-            // Create and send an authentication token
-            const payload = {
-                id: foundUser._id,
-                firstName: foundUser.firstName,
-                role: foundUser.role,
-                email: foundUser.email,
-            };
-            const token = jwt.sign(payload, JWT_SECRET, {});
-            
-            // Set the token in a cookie
-            res.cookie(tokenName, token, { httpOnly: true, sameSite: 'none', secure: true, maxAge: 3600000 }).json({ message: "Login successful" });
-        }
-        } catch (err) {
-            console.error("Error during login:", err);
-            next(err);
-        }
-        };
+            const { password: userPassword, ...otherDetails } = foundUser._doc;
+
+        // Create and send a cookie contaions authentication token
+            const token = jwt.sign({ id: foundUser._id, firstName: foundUser.firstName, role: foundUser.role, email: foundUser.email }, JWT_SECRET, {}, (err, token) => {
+                const userObject = foundUser.toObject();
+                const { password, ...userWithoutPassword } = userObject;
+                res.cookie(tokenName, token, {httpOnly: false, sameSite: 'none', secure: true}).json({...userWithoutPassword, userId: foundUser._id});
+            })}
+
+    } catch (err) {
+        console.error("Error during login:", err);
+        next(err);
+    }
+}
 
 export const getProfile = (req, res) => {
     const tokenName = req.baseUrl === '/users' ? 'userToken' : 'carerToken' // Adjust based on the route
