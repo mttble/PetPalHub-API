@@ -16,10 +16,10 @@ const app = express()
 
 app.use(cors({
     credentials: true,
-    origin: 'https://petpalhub.au'
+    origin: 'petpalhub.au'
 }))
 const corsOptions = {
-    origin: 'https://petpalhub.au',
+    origin: 'petpalhub.au',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
 };
