@@ -15,14 +15,14 @@ import usersRoutes from './routes/usersRoute.js'
 const app = express()
 
 const corsOptions = {
-    origin: 'https://petpalhub.au',
+    origin: 'https://petpalhub.netlify.app/',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
 };
 
 app.use(cors({
     credentials: true,
-    origin: 'https://petpalhub.au'
+    origin: 'https://petpalhub.netlify.app/'
 }))
 
 
